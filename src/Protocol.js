@@ -1,0 +1,74 @@
+const SIZE_IN_FRAME = 4
+const SIZE_OUT_FRAME = 5
+
+const CMD_SET = 0x01
+const CMD_APPLY = 0x02
+const CMD_FILL = 0x03
+const CMD_OFF = 0x04
+
+const RES_CONN_ACK = 0x01
+const RES_APPLY_ACK = 0x02
+const RES_FILL_ACK = 0x03
+const RES_OFF_ACK = 0x04
+
+class Protocol {
+  static set (buffer, offset, led, red, green, blue) {
+    buffer.writeUInt8(CMD_SET, offset)
+    buffer.writeUInt8(led, offset + 1)
+    buffer.writeUInt8(red, offset + 2)
+    buffer.writeUInt8(green, offset + 3)
+    buffer.writeUInt8(blue, offset + 4)
+    return buffer
+  }
+
+  static apply (buffer, offset) {
+    buffer.writeUInt8(CMD_APPLY, offset)
+    buffer.fill(0, offset + 1, offset + 1 + 4)
+    return buffer
+  }
+
+  static fill (buffer, offset, red, green, blue) {
+    buffer.writeUInt8(CMD_FILL, offset)
+    buffer.writeUInt8(0x00, offset + 1)
+    buffer.writeUInt8(red, offset + 2)
+    buffer.writeUInt8(green, offset + 3)
+    buffer.writeUInt8(blue, offset + 4)
+    return buffer
+  }
+
+  static off (buffer, offset) {
+    buffer.writeUInt8(CMD_OFF, offset)
+    buffer.fill(0, offset + 1, offset + 1 + 4)
+    return buffer
+  }
+
+  static decodeFrame (frame) {
+    let msg = frame.readUInt8(0)
+    switch (msg) {
+      case RES_CONN_ACK:
+        return {connected: true}
+
+      case RES_APPLY_ACK:
+        return {ack: true, cmd: 'apply'}
+
+      case RES_FILL_ACK:
+        return {ack: true, cmd: 'fill'}
+
+      case RES_OFF_ACK:
+        return {ack: true, cmd: 'off'}
+
+      default:
+        throw new Error('Unrecognized error')
+    }
+  }
+
+  static inboundFrameSize () {
+    return SIZE_IN_FRAME
+  }
+
+  static outboundFrameSize () {
+    return SIZE_OUT_FRAME
+  }
+}
+
+module.exports = Protocol
