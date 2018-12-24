@@ -42,7 +42,7 @@ class Neopixel extends EventEmitter {
 
   setPixels (pixels) {
     return new Promise(done => {
-      let buffer = Buffer.alloc(Protocol.outboundFrameSize() * (pixels.length + 1), 0)
+      let buffer = Protocol.createOutboundFrame(pixels.length + 1)
       let offset = 0
       for (const {led, l, red, r, green, g, blue, b} of pixels) {
         Protocol.set(
@@ -62,7 +62,7 @@ class Neopixel extends EventEmitter {
 
   fill (red, green, blue) {
     return new Promise(done => {
-      let buffer = Buffer.alloc(0, Protocol.outboundFrameSize())
+      let buffer = Protocol.createOutboundFrame()
       Protocol.fill(buffer, 0, red, green, blue)
 
       this.cbs.push({time: Date.now(), done})
@@ -72,8 +72,8 @@ class Neopixel extends EventEmitter {
 
   off () {
     return new Promise(done => {
-      let buffer = Buffer.alloc(0, Protocol.outboundFrameSize())
-      Protocol.fill(buffer, 0)
+      let buffer = Protocol.createOutboundFrame()
+      Protocol.off(buffer, 0)
 
       this.cbs.push({time: Date.now(), done})
       this.transport.write(buffer)

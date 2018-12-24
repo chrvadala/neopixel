@@ -70,8 +70,8 @@ class Protocol {
     return SIZE_OUT_FRAME
   }
 
-  static createOutboundFrame(){
-    return Buffer.alloc(Protocol.outboundFrameSize(), 0)
+  static createOutboundFrame (frames = 1) {
+    return Buffer.alloc(Protocol.outboundFrameSize() * frames, 0)
   }
 }
 
