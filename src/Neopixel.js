@@ -44,10 +44,10 @@ class Neopixel extends EventEmitter {
     return new Promise(done => {
       let buffer = Buffer.alloc(Protocol.outboundFrameSize() * (pixels.length + 1), 0)
       let offset = 0
-      for (const {led, red, r, green, g, blue, b} of pixels) {
+      for (const {led, l, red, r, green, g, blue, b} of pixels) {
         Protocol.set(
           buffer, offset,
-          led,
+          led || l || 0,
           red || r || 0,
           green || g || 0,
           blue || b || 0

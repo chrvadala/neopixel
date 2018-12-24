@@ -49,15 +49,15 @@ test('setPixels', async () => {
   const res = await neopixel.connect(fakeTransport)
 
   const res2 = await neopixel.setPixels([
-    {led: 42, r: 1, g: 2, b: 3},
+    {l: 42, r: 1, g: 2, b: 3},
     {led: 43, red: 4, green: 5, blue: 6},
-    {led: 44},
+    {}, //like {l: 0, r: 0, g: 0, b: 0}
   ])
 
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
     Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3),
     Protocol.set(Protocol.createOutboundFrame(), 0, 43, 4, 5, 6),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 44, 0, 0, 0),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
     Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
 })
