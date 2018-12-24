@@ -71,4 +71,14 @@ class Protocol {
   }
 }
 
+Protocol.CMD_SET = CMD_SET
+Protocol.CMD_APPLY = CMD_APPLY
+Protocol.CMD_FILL = CMD_FILL
+Protocol.CMD_OFF = CMD_OFF
+
+Protocol.RES_CONN_ACK = RES_CONN_ACK
+Protocol.RES_APPLY_ACK = RES_APPLY_ACK
+Protocol.RES_FILL_ACK = RES_FILL_ACK
+Protocol.RES_OFF_ACK = RES_OFF_ACK
+
 module.exports = Protocol

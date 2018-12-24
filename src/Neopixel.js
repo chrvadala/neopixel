@@ -1,117 +1,90 @@
-const net = require('net');
+const net = require('net')
 const EventEmitter = require('events')
 const debug = require('debug')('rainbow')
+const TcpTransport = require('./TcpTransport')
+const Protocol = require('./Protocol')
 
-const CMD_SHOW = 0x01
-const CMD_SET_LED = 0x02
-const CMD_SET_LEDS = 0x03
-const CMD_SET_BRIGHTNESS = 0x04
-
-const RES_CONN_ACK = 0x01
-const RES_SHOW_ACK = 0x02
-
-module.exports = class Rainbow extends EventEmitter {
-  constructor({host, port, leds}) {
+class Neopixel extends EventEmitter {
+  constructor () {
     super()
-    this._leds = leds;
-    this._showCbs = []
 
-    this.client = new net.Socket();
-    this.client.setNoDelay(true)
-    this.client.on('data', data => {
-      let msg = data.readUInt8(0)
-      if (msg === RES_CONN_ACK) {
-        debug('ready')
-        this.emit('ready')
-        return
-      }
-
-      if (msg === RES_SHOW_ACK) {
-        let {cb, time} = this._showCbs.shift()
-        if (cb) cb()
-        debug('show_ack: latency %dms', Date.now() - time)
-        return
-      }
-
-      debug('Received: ' + data.readUInt8(0));
-    });
-
-    this.client.on('error', () => {
-      this.emit('error');
-      console.error('Rainbow Error');
-    })
-
-    this.client.on('close', () => {
-      debug('close')
-      this.emit('close')
-    })
-
-    debug('connecting')
-    this.client.connect(port, host, () => {
-      debug('connect')
-      this.setLeds(0, 0, 0)
-    })
+    this.transport = undefined
+    this.cbs = []
   }
 
-  turnOff() {
-    let size = this.size()
-    for (let i = 0; i < size; i++) {
-      this.setLed(i, 0, 0, 0)
+  async connect (urlOrTransport) {
+    switch (typeof urlOrTransport) {
+      case 'string':
+        this.transport = new TcpTransport()
+        break
+
+      case 'object':
+        this.transport = urlOrTransport
+        break
+
+      default:
+        throw new Error('Unsupported connection type')
     }
-    this.show()
+
+    this.transport.onFrame(this._handleFrame.bind(this))
+
+    const [, res] = await Promise.all([
+      new Promise(done => this.cbs.push({time: Date.now(), done})),
+      this.transport.connect(urlOrTransport),
+    ])
+
+    return res
   }
 
-  setLed(led, red, green, blue) {
-    const b = Buffer.alloc(5)
-    b.writeUInt8(CMD_SET_LED, 0)
-    b.writeUInt8(led, 1)
-    b.writeUInt8(red, 2)
-    b.writeUInt8(green, 3)
-    b.writeUInt8(blue, 4)
-    this.client.write(b)
-    this.log(`setLed(${led},${red},${green},${blue})`, b)
+  async disconnect () {
+    await this.transport.disconnect()
   }
 
-  setBrightness(brightness) {
-    const b = Buffer.alloc(5)
-    b.writeUInt8(CMD_SET_BRIGHTNESS, 0)
-    b.writeUInt8(brightness, 2)
-    this.client.write(b)
-    this.log(`setBrightness(${brightness})`, b)
+  setPixels (pixels) {
+    return new Promise(done => {
+      let buffer = Buffer.alloc(Protocol.outboundFrameSize() * (pixels.length + 1), 0)
+      let offset = 0
+      for (const {led, red, r, green, g, blue, b} of pixels) {
+        Protocol.set(
+          buffer, offset,
+          led,
+          red || r || 0,
+          green || g || 0,
+          blue || b || 0
+        )
+        offset += Protocol.outboundFrameSize()
+      }
+      Protocol.apply(buffer, offset)
+      this.cbs.push({time: Date.now(), done})
+      this.transport.write(buffer)
+    })
   }
 
-  show(cb) {
-    const b = Buffer.alloc(5)
-    b.writeUInt8(CMD_SHOW, 0)
-    this.log('show()', b)
-    this._showCbs.push({time: Date.now(), cb})
-    this.client.write(b)
+  fill (red, green, blue) {
+    return new Promise(done => {
+      let buffer = Buffer.alloc(0, Protocol.outboundFrameSize())
+      Protocol.fill(buffer, 0, red, green, blue)
+
+      this.cbs.push({time: Date.now(), done})
+      this.transport.write(buffer)
+    })
   }
 
-  setLeds(red, green, blue, cb) {
-    const b = Buffer.alloc(5)
-    b.writeUInt8(CMD_SET_LEDS, 0)
-    b.writeUInt8(red, 2)
-    b.writeUInt8(green, 3)
-    b.writeUInt8(blue, 4)
-    this.log(`setLeds(${red},${green},${blue})`, b)
-    this._showCbs.push({time: Date.now(), cb})
-    this.client.write(b)
+  off () {
+    return new Promise(done => {
+      let buffer = Buffer.alloc(0, Protocol.outboundFrameSize())
+      Protocol.fill(buffer, 0)
+
+      this.cbs.push({time: Date.now(), done})
+      this.transport.write(buffer)
+    })
   }
 
-
-  size() {
-    return this._leds
+  _handleFrame (frame) {
+    const decodedFrame = Protocol.decodeFrame(frame)
+    let {time, done} = this.cbs.shift()
+    done({...frame, latency: Date.now() - time})
   }
-
-  log(desc, buffer) {
-    if (!debug.enabled) return
-    const hex = buffer.toString('hex')
-    let c = ''
-    for (let i = 0; i < hex.length; i += 2) {
-      c += '\\x' + hex.substr(i, 2)
-    }
-    debug('desc:%s buffer: %s queue', desc, c, this.client.bufferSize)
-  }
-
 }
+
+module.exports = Neopixel

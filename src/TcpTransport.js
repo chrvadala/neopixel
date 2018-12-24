@@ -24,8 +24,7 @@ class TcpTransport extends EventEmitter {
       this.client.setNoDelay(true)
 
       this.client.on('error', err => {
-        debug('error', err)
-        this.emit('error')
+        debug('error', err.message)
         reject(err)
       })
 
@@ -36,7 +35,7 @@ class TcpTransport extends EventEmitter {
 
       debug('connecting')
       this.client.connect(parseInt(this.url.port), this.url.hostname, () => {
-        debug('connect')
+        debug('connect', this.url)
         resolve()
       })
     })
