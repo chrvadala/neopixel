@@ -54,11 +54,10 @@ test('setPixels', async () => {
     {led: 44},
   ])
 
-  const getBuffer = () => Buffer.alloc(Protocol.outboundFrameSize())
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
-    Protocol.set(getBuffer(), 0, 42, 1, 2, 3),
-    Protocol.set(getBuffer(), 0, 43, 4, 5, 6),
-    Protocol.set(getBuffer(), 0, 44, 0, 0, 0),
-    Protocol.apply(getBuffer(), 0)
+    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 4, 5, 6),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 44, 0, 0, 0),
+    Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
 })

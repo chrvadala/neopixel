@@ -60,4 +60,5 @@ test('decodeFrame', () => {
 test('in/outFrameSize', () => {
   expect(Protocol.inboundFrameSize()).toEqual(4)
   expect(Protocol.outboundFrameSize()).toEqual(5)
+  expect(Protocol.createOutboundFrame()).toEqual(Buffer.alloc(5, 0))
 })

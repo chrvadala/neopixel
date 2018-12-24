@@ -69,6 +69,10 @@ class Protocol {
   static outboundFrameSize () {
     return SIZE_OUT_FRAME
   }
+
+  static createOutboundFrame(){
+    return Buffer.alloc(Protocol.outboundFrameSize(), 0)
+  }
 }
 
 Protocol.CMD_SET = CMD_SET
