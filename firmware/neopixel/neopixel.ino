@@ -1,17 +1,20 @@
 /**
-*
-* Firmware for https://github.com/chrvadala/neopixel library
-*
-*/
+  Firmware for https://github.com/chrvadala/neopixel library
 
-// echo -ne '\x02\x10\x00\x00\xff\x01\x00\x00\x00\x00' | nc rainbow.local 800 | hexdump
-// echo -ne '\x03\x00\xff\xff\xff' | nc rainbow.local 800 | hexdump
-// echo -ne '\x04\xff\xff\xff\xff' | nc rainbow.local 800 | hexdump
+  set pixel and apply
+  echo -ne '\x01\x10\xff\xff\xff\x02\x00\x00\x00\x00' | nc rainbow.local 800 | hexdump
+
+  set pixels with a color
+  echo -ne '\x03\x10\xff\xff\xff' | nc rainbow.local 800 | hexdump
+
+  turn off every pixel
+  echo -ne '\x04\x10\xff\xff\xff' | nc rainbow.local 800 | hexdump
+
+**/
 
 #include <WiFiManager.h>
 #include <ESP8266mDNS.h>
 #include <Adafruit_NeoPixel.h>
-#include <ArduinoJson.h>
 #ifdef __AVR__
 #include <avr/power.h>
 #endif
@@ -20,16 +23,20 @@
 #define PIN            D2
 #define NUMPIXELS      60
 
-#define CMD_SHOW           0x01
-#define CMD_SET_LED        0x02
-#define CMD_SET_LEDS       0x03
-#define CMD_SET_BRIGHTNESS 0x04
+#define CMD_SET         0x01
+#define CMD_APPLY       0x02
+#define CMD_FILL        0x03
+#define CMD_OFF         0x04
 
-#define RES_CONN_ACK        0x01
-#define RES_SHOW_ACK        0x02
+#define RES_CONN_ACK    0x01
+#define RES_APPLY_ACK   0x02
+#define RES_FILL_ACK    0x03
+#define RES_OFF_ACK     0x04
 
-const bool debug = false;
+const bool debug = true;
 const bool wipe = false;
+
+const char fill = 0x00;
 
 WiFiServer wifiServer(800);
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
@@ -64,7 +71,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 }
 
-void loop(){
+void loop() {
   handleWifiClient();
 }
 
@@ -73,7 +80,7 @@ void loop(){
 byte params [5];
 bool handleCommand(Stream& client) {
   int n = client.readBytes((byte*)params, 5);
-  if(n < 5) return false;
+  if (n < 5) return false;
 
   int cmd = params[0];
   int led = params[1], brightness = params[1];
@@ -82,29 +89,43 @@ bool handleCommand(Stream& client) {
   int blue = params[4];
 
   switch (cmd) {
-    case CMD_SHOW:
-      pixels.show();
-      client.write(RES_SHOW_ACK);
-      if (debug) Serial.println("SHOW");
-      break;
-
-    case CMD_SET_LED:
+    case CMD_SET:
       pixels.setPixelColor(led, red, green, blue);
-      if (debug) Serial.println("CMD_SET_LED " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      if (debug) Serial.println("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
-    case CMD_SET_LEDS:
+    case CMD_APPLY:
+      pixels.show();
+      client.write(RES_APPLY_ACK);
+      client.write(fill);
+      client.write(fill);
+      client.write(fill);
+
+      if (debug) Serial.println("CMD_APPLY");
+      break;
+
+    case CMD_FILL:
       for (int i = 0; i < NUMPIXELS; i++) {
         pixels.setPixelColor(i, red, green, blue);
       }
       pixels.show();
-      client.write(RES_SHOW_ACK);
-      if (debug) Serial.println("CMD_SET_LEDS [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      client.write(RES_FILL_ACK);
+      client.write(fill);
+      client.write(fill);
+      client.write(fill);
+      if (debug) Serial.println("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
-    case CMD_SET_BRIGHTNESS:
-      pixels.setBrightness(brightness);
-      if (debug) Serial.println("CMD_SET_BRIGHTNESS [" + String(brightness) + "]");
+    case CMD_OFF:
+      for (int i = 0; i < NUMPIXELS; i++) {
+        pixels.setPixelColor(i, 0, 0, 0);
+      }
+      pixels.show();
+      client.write(RES_OFF_ACK);
+      client.write(fill);
+      client.write(fill);
+      client.write(fill);
+      if (debug) Serial.println("CMD_OFF");
       break;
 
     default:
@@ -123,6 +144,10 @@ void handleWifiClient() {
   while (client.connected())  {
     if (!established)    {
       client.write(RES_CONN_ACK);
+      client.write(fill);
+      client.write(fill);
+      client.write(fill);
+
       established = true;
       digitalWrite(LED_BUILTIN, LOW);
       if (debug) Serial.println("connected");

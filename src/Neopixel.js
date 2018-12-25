@@ -15,7 +15,7 @@ class Neopixel extends EventEmitter {
   async connect (urlOrTransport) {
     switch (typeof urlOrTransport) {
       case 'string':
-        this.transport = new TcpTransport()
+        this.transport = new TcpTransport(Protocol.inboundFrameSize())
         break
 
       case 'object':
