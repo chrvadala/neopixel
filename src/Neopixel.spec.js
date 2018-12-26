@@ -1,6 +1,7 @@
 const Neopixel = require('./Neopixel')
 const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
+const BadType = require('./BadType')
 
 const fakeTransport = {
   connect: jest.fn(),
@@ -39,7 +40,7 @@ test('connect and disconnect', async () => {
 })
 
 test('setPixels', async () => {
-  expect.assertions(1)
+  expect.assertions(2)
 
   fakeTransport.connect.mockImplementationOnce(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
@@ -63,6 +64,8 @@ test('setPixels', async () => {
     Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
     Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
+
+  await expect(neopixel.setPixels({l: 42, r: 1, g: 2, b: 3})).rejects.toBeInstanceOf(BadType)
 })
 
 test('fill', async () => {

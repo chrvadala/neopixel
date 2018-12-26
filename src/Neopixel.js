@@ -4,6 +4,7 @@ const debug = require('debug')('rainbow')
 const TcpTransport = require('./TcpTransport')
 const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
+const BadType = require('./BadType')
 
 class Neopixel extends EventEmitter {
   constructor () {
@@ -48,6 +49,8 @@ class Neopixel extends EventEmitter {
 
   setPixels (pixels) {
     return new Promise((resolve, reject) => {
+      if (!Array.isArray(pixels)) return reject(new BadType('setPixels accepts only arrays'))
+
       let buffer = Protocol.createOutboundFrame(pixels.length + 1)
       let offset = 0
       for (const {led, l, red, r, green, g, blue, b} of pixels) {
@@ -66,7 +69,7 @@ class Neopixel extends EventEmitter {
     })
   }
 
-  fill (red, green, blue) {
+  fill (red = 0, green = 0, blue = 0) {
     return new Promise((resolve, reject) => {
       let buffer = Protocol.createOutboundFrame()
       Protocol.fill(buffer, 0, red, green, blue)
