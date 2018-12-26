@@ -1,6 +1,6 @@
 const net = require('net')
 const EventEmitter = require('events')
-const debug = require('debug')('rainbow')
+const debug = require('debug')('neopixel:Neopixel')
 const TcpTransport = require('./TcpTransport')
 const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
@@ -98,6 +98,7 @@ class Neopixel extends EventEmitter {
     const {ack: receivedAck} = Protocol.decodeFrame(frame)
     const {time, ack: expectedAck, resolve, reject} = this.cbs.shift()
     const latency = Date.now() - time
+    debug('latency %d ms', latency)
     if (receivedAck === expectedAck) {
       resolve({latency})
     } else {
