@@ -47,13 +47,13 @@ class Neopixel extends EventEmitter {
     await this.transport.disconnect()
   }
 
-  setPixels (pixels) {
+  setPixels (colors) {
     return new Promise((resolve, reject) => {
-      if (!Array.isArray(pixels)) return reject(new BadType('setPixels accepts only arrays'))
+      if (!Array.isArray(colors)) return reject(new BadType('setPixels accepts only arrays'))
 
-      let buffer = Protocol.createOutboundFrame(pixels.length + 1)
+      let buffer = Protocol.createOutboundFrame(colors.length + 1)
       let offset = 0
-      for (const {led, l, red, r, green, g, blue, b} of pixels) {
+      for (const {led, l, red, r, green, g, blue, b} of colors) {
         Protocol.set(
           buffer, offset,
           led || l || 0,
@@ -69,11 +69,16 @@ class Neopixel extends EventEmitter {
     })
   }
 
-  fill (red = 0, green = 0, blue = 0) {
+  fill (color) {
     return new Promise((resolve, reject) => {
       let buffer = Protocol.createOutboundFrame()
-      Protocol.fill(buffer, 0, red, green, blue)
-
+      const {red, r, green, g, blue, b} = color
+      Protocol.fill(
+        buffer, 0,
+        red || r || 0,
+        green || g || 0,
+        blue || b || 0,
+      )
       this.cbs.push({time: Date.now(), ack: 'fill', resolve, reject})
       this.transport.write(buffer)
     })
