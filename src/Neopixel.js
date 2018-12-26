@@ -83,7 +83,7 @@ class Neopixel extends EventEmitter {
   _handleFrame (frame) {
     const decodedFrame = Protocol.decodeFrame(frame)
     let {time, done} = this.cbs.shift()
-    done({...frame, latency: Date.now() - time})
+    done({latency: Date.now() - time})
   }
 }
 

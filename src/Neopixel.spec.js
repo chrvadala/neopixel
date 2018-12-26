@@ -6,10 +6,12 @@ const fakeTransport = {
   disconnect: jest.fn(),
   write: jest.fn(),
   onFrame: jest.fn(),
-  _simulateFrame (buffer) {
+  _simulateIncomingFrame (buffer) {
     const calls = fakeTransport.onFrame.mock.calls
     const cb = calls[calls.length - 1][0]
-    cb(buffer)
+    setTimeout(() => {
+      cb(buffer)
+    }, 100)
   }
 }
 
@@ -24,7 +26,7 @@ test('connect and disconnect', async () => {
   expect.assertions(4)
 
   fakeTransport.connect.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_CONN_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
 
   const neopixel = new Neopixel()
@@ -39,10 +41,10 @@ test('setPixels', async () => {
   expect.assertions(1)
 
   fakeTransport.connect.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_CONN_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
   fakeTransport.write.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
   })
 
   const neopixel = new Neopixel()
@@ -66,10 +68,10 @@ test('fill', async () => {
   expect.assertions(1)
 
   fakeTransport.connect.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_CONN_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
   fakeTransport.write.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_FILL_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK]))
   })
 
   const neopixel = new Neopixel()
@@ -86,10 +88,10 @@ test('off', async () => {
   expect.assertions(1)
 
   fakeTransport.connect.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_CONN_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
   fakeTransport.write.mockImplementationOnce(() => {
-    fakeTransport._simulateFrame(Buffer.from([Protocol.RES_OFF_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
   })
 
   const neopixel = new Neopixel()
@@ -101,3 +103,4 @@ test('off', async () => {
     Protocol.off(Protocol.createOutboundFrame(), 0),
   )
 })
+
