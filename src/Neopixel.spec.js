@@ -27,7 +27,7 @@ test('connect with unavailable server', async () => {
 test('connect and disconnect', async () => {
   expect.assertions(4)
 
-  fakeTransport.connect.mockImplementationOnce(() => {
+  fakeTransport.connect.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
 
@@ -42,10 +42,10 @@ test('connect and disconnect', async () => {
 test('setPixels', async () => {
   expect.assertions(2)
 
-  fakeTransport.connect.mockImplementationOnce(() => {
+  fakeTransport.connect.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
-  fakeTransport.write.mockImplementationOnce(() => {
+  fakeTransport.write.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
   })
 
@@ -71,7 +71,7 @@ test('setPixels', async () => {
 test('fill', async () => {
   expect.assertions(3)
 
-  fakeTransport.connect.mockImplementationOnce(() => {
+  fakeTransport.connect.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
   fakeTransport.write.mockImplementation(() => {
@@ -100,10 +100,10 @@ test('fill', async () => {
 test('off', async () => {
   expect.assertions(1)
 
-  fakeTransport.connect.mockImplementationOnce(() => {
+  fakeTransport.connect.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
-  fakeTransport.write.mockImplementationOnce(() => {
+  fakeTransport.write.mockImplementation(() => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
   })
 
@@ -121,7 +121,7 @@ describe('test incoming frame feedback', () => {
   let neopixel
   beforeEach(async () => {
     jest.resetAllMocks()
-    fakeTransport.connect.mockImplementationOnce(() => {
+    fakeTransport.connect.mockImplementation(() => {
       fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
     })
 
@@ -134,7 +134,7 @@ describe('test incoming frame feedback', () => {
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
       })
       await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
@@ -142,7 +142,7 @@ describe('test incoming frame feedback', () => {
 
     test('with WRONG feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
@@ -154,7 +154,7 @@ describe('test incoming frame feedback', () => {
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK]))
       })
       await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
@@ -162,7 +162,7 @@ describe('test incoming frame feedback', () => {
 
     test('with WRONG feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
@@ -174,7 +174,7 @@ describe('test incoming frame feedback', () => {
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
       })
       await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
@@ -182,7 +182,7 @@ describe('test incoming frame feedback', () => {
 
     test('with WRONG feedback', async () => {
       expect.assertions(1)
-      fakeTransport.write.mockImplementationOnce(() => {
+      fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
