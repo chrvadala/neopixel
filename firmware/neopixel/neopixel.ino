@@ -33,7 +33,7 @@
 #define RES_FILL_ACK    0x03
 #define RES_OFF_ACK     0x04
 
-const bool debug = false;
+const bool debug = false; //enable this increases the latency
 const bool wipe = false;
 
 const char fill = 0x00;
