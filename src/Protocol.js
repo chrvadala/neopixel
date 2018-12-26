@@ -46,16 +46,16 @@ class Protocol {
     let msg = frame.readUInt8(0)
     switch (msg) {
       case RES_CONN_ACK:
-        return {connected: true}
+        return {ack: 'connect'}
 
       case RES_APPLY_ACK:
-        return {ack: true, cmd: 'apply'}
+        return {ack: 'apply'}
 
       case RES_FILL_ACK:
-        return {ack: true, cmd: 'fill'}
+        return {ack: 'fill'}
 
       case RES_OFF_ACK:
-        return {ack: true, cmd: 'off'}
+        return {ack: 'off'}
 
       default:
         throw new Error('Unrecognized error')

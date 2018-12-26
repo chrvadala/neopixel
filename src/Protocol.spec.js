@@ -45,16 +45,16 @@ test('off', () => {
 
 test('decodeFrame', () => {
   expect(Protocol.decodeFrame(Buffer.from([0x01, 0, 0, 0])))
-    .toEqual({connected: true})
+    .toEqual({ack: 'connect'})
 
   expect(Protocol.decodeFrame(Buffer.from([0x02, 0, 0, 0])))
-    .toEqual({ack: true, cmd: 'apply'})
+    .toEqual({ack: 'apply'})
 
   expect(Protocol.decodeFrame(Buffer.from([0x03, 0, 0, 0])))
-    .toEqual({ack: true, cmd: 'fill'})
+    .toEqual({ack: 'fill'})
 
   expect(Protocol.decodeFrame(Buffer.from([0x04, 0, 0, 0])))
-    .toEqual({ack: true, cmd: 'off'})
+    .toEqual({ack: 'off'})
 })
 
 test('in/outFrameSize', () => {
