@@ -53,10 +53,10 @@ class Neopixel extends EventEmitter {
 
       let buffer = Protocol.createOutboundFrame(colors.length + 1)
       let offset = 0
-      for (const {led, l, red, r, green, g, blue, b} of colors) {
+      for (const {pixel, p, red, r, green, g, blue, b} of colors) {
         Protocol.set(
           buffer, offset,
-          led || l || 0,
+          pixel || p || 0,
           red || r || 0,
           green || g || 0,
           blue || b || 0

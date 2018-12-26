@@ -53,8 +53,8 @@ test('setPixels', async () => {
   const res = await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
-    {l: 42, r: 1, g: 2, b: 3},
-    {led: 43, red: 4, green: 5, blue: 6},
+    {p: 42, r: 1, g: 2, b: 3},
+    {pixel: 43, red: 4, green: 5, blue: 6},
     {}, //like {l: 0, r: 0, g: 0, b: 0}
   ])
 
