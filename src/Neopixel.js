@@ -3,6 +3,7 @@ const EventEmitter = require('events')
 const debug = require('debug')('rainbow')
 const TcpTransport = require('./TcpTransport')
 const Protocol = require('./Protocol')
+const WrongFeedback = require('./WrongFeedback')
 
 class Neopixel extends EventEmitter {
   constructor () {
@@ -28,8 +29,13 @@ class Neopixel extends EventEmitter {
 
     this.transport.onFrame(this._handleFrame.bind(this))
 
-    const [, res] = await Promise.all([
-      new Promise(done => this.cbs.push({time: Date.now(), done})),
+    const [res] = await Promise.all([
+      new Promise((resolve, reject) => this.cbs.push({
+        time: Date.now(),
+        ack: 'connect',
+        resolve,
+        reject
+      })),
       this.transport.connect(urlOrTransport),
     ])
 
@@ -41,7 +47,7 @@ class Neopixel extends EventEmitter {
   }
 
   setPixels (pixels) {
-    return new Promise(done => {
+    return new Promise((resolve, reject) => {
       let buffer = Protocol.createOutboundFrame(pixels.length + 1)
       let offset = 0
       for (const {led, l, red, r, green, g, blue, b} of pixels) {
@@ -55,35 +61,41 @@ class Neopixel extends EventEmitter {
         offset += Protocol.outboundFrameSize()
       }
       Protocol.apply(buffer, offset)
-      this.cbs.push({time: Date.now(), done})
+      this.cbs.push({time: Date.now(), ack: 'apply', resolve, reject})
       this.transport.write(buffer)
     })
   }
 
   fill (red, green, blue) {
-    return new Promise(done => {
+    return new Promise((resolve, reject) => {
       let buffer = Protocol.createOutboundFrame()
       Protocol.fill(buffer, 0, red, green, blue)
 
-      this.cbs.push({time: Date.now(), done})
+      this.cbs.push({time: Date.now(), ack: 'fill', resolve, reject})
       this.transport.write(buffer)
     })
   }
 
   off () {
-    return new Promise(done => {
+    return new Promise((resolve, reject) => {
       let buffer = Protocol.createOutboundFrame()
       Protocol.off(buffer, 0)
 
-      this.cbs.push({time: Date.now(), done})
+      this.cbs.push({time: Date.now(), ack: 'off', resolve, reject})
       this.transport.write(buffer)
     })
   }
 
   _handleFrame (frame) {
-    const decodedFrame = Protocol.decodeFrame(frame)
-    let {time, done} = this.cbs.shift()
-    done({latency: Date.now() - time})
+    const {ack: receivedAck} = Protocol.decodeFrame(frame)
+    const {time, ack: expectedAck, resolve, reject} = this.cbs.shift()
+    const latency = Date.now() - time
+    if (receivedAck === expectedAck) {
+      resolve({latency})
+    } else {
+      debug('WrongFeedback received: %s, expected: %s', receivedAck, expectedAck)
+      reject(new WrongFeedback())
+    }
   }
 }
 
