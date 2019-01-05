@@ -6,7 +6,7 @@ const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
 const BadType = require('./BadType')
 
-class Neopixel extends EventEmitter {
+class NeoPixel extends EventEmitter {
   constructor () {
     super()
 
@@ -47,13 +47,13 @@ class Neopixel extends EventEmitter {
     await this.transport.disconnect()
   }
 
-  setPixels (colors) {
+  setPixels (arrayOfColors) {
     return new Promise((resolve, reject) => {
-      if (!Array.isArray(colors)) return reject(new BadType('setPixels accepts only arrays'))
+      if (!Array.isArray(arrayOfColors)) return reject(new BadType('setPixels accepts only arrays'))
 
-      let buffer = Protocol.createOutboundFrame(colors.length + 1)
+      let buffer = Protocol.createOutboundFrame(arrayOfColors.length + 1)
       let offset = 0
-      for (const {pixel, p, red, r, green, g, blue, b} of colors) {
+      for (const {pixel, p, red, r, green, g, blue, b} of arrayOfColors) {
         Protocol.set(
           buffer, offset,
           pixel || p || 0,
@@ -108,4 +108,4 @@ class Neopixel extends EventEmitter {
   }
 }
 
-module.exports = Neopixel
+module.exports = NeoPixel

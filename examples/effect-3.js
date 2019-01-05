@@ -1,4 +1,4 @@
-const Rainbow = require('..')
+const NeoPixel = require('..')
 
 const PIXELS = 60
 const PAUSE = 100
@@ -22,12 +22,12 @@ const COLORS = [
   {},
   {},
 ]
-const rainbow = new Rainbow()
+const neopixel = new NeoPixel()
 const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));
 
 (async () => {
   try {
-    await rainbow.connect('tcp://rainbow.local:800')
+    await neopixel.connect('tcp://neopixel.local:800')
 
     let colorIndex = 0
     let curPixel = 0
@@ -39,7 +39,7 @@ const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));
         colors.push({pixel, ...color})
       }
 
-      const {latency} = await rainbow.setPixels(colors)
+      const {latency} = await neopixel.setPixels(colors)
       console.log(`latency=${latency}ms`)
       await wait(PAUSE - latency)
       colorIndex = ++colorIndex % COLORS.length
@@ -55,7 +55,7 @@ process.on('SIGINT', async () => {
   console.log('Caught interrupt signal')
 
   await Promise.race([
-    rainbow.off(),
+    neopixel.off(),
     wait(10000),
   ])
   process.exit(0)

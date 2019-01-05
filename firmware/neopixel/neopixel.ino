@@ -2,13 +2,13 @@
   Firmware for https://github.com/chrvadala/neopixel library
 
   set pixel and apply
-  echo -ne '\x01\x10\xff\xff\xff\x02\x00\x00\x00\x00' | nc rainbow.local 800 | hexdump
+  echo -ne '\x01\x10\xff\xff\xff\x02\x00\x00\x00\x00' | nc neopixel.local 800 | hexdump
 
   set pixels with a color
-  echo -ne '\x03\x10\xff\xff\xff' | nc rainbow.local 800 | hexdump
+  echo -ne '\x03\x10\xff\xff\xff' | nc neopixel.local 800 | hexdump
 
   turn off every pixel
-  echo -ne '\x04\x10\xff\xff\xff' | nc rainbow.local 800 | hexdump
+  echo -ne '\x04\x10\xff\xff\xff' | nc neopixel.local 800 | hexdump
 
 **/
 
@@ -19,8 +19,8 @@
 #include <avr/power.h>
 #endif
 
-#define NAME          "rainbow"
-#define PIN            D2
+#define NAME          "neopixel"
+#define PIN            D1
 #define NUMPIXELS      60
 
 #define CMD_SET         0x01
@@ -52,7 +52,7 @@ void setup() {
 
   if (wipe) wm.resetSettings();
 
-  bool res = wm.autoConnect("Rainbow");
+  bool res = wm.autoConnect(NAME);
 
   if (!res) {
     if (debug) Serial.println("Failed to connect");

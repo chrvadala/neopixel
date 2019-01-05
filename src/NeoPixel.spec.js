@@ -1,4 +1,4 @@
-const Neopixel = require('./Neopixel')
+const NeoPixel = require('./NeoPixel')
 const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
 const BadType = require('./BadType')
@@ -20,7 +20,7 @@ const fakeTransport = {
 test('connect with unavailable server', async () => {
   expect.assertions(1)
 
-  const neopixel = new Neopixel()
+  const neopixel = new NeoPixel()
   await expect(neopixel.connect('tcp://localhost:9999')).rejects.toEqual(expect.anything())
 })
 
@@ -31,7 +31,7 @@ test('connect and disconnect', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
   })
 
-  const neopixel = new Neopixel()
+  const neopixel = new NeoPixel()
   await expect(neopixel.connect(fakeTransport)).resolves.toEqual({latency: expect.any(Number)})
   expect(fakeTransport.connect).toHaveBeenCalledTimes(1)
 
@@ -49,7 +49,7 @@ test('setPixels', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
   })
 
-  const neopixel = new Neopixel()
+  const neopixel = new NeoPixel()
   const res = await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
@@ -78,7 +78,7 @@ test('fill', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK]))
   })
 
-  const neopixel = new Neopixel()
+  const neopixel = new NeoPixel()
   const res = await neopixel.connect(fakeTransport)
 
   await neopixel.fill({red: 1, green: 2, blue: 3})
@@ -107,7 +107,7 @@ test('off', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
   })
 
-  const neopixel = new Neopixel()
+  const neopixel = new NeoPixel()
   const res = await neopixel.connect(fakeTransport)
 
   await neopixel.off()
@@ -125,7 +125,7 @@ describe('test incoming frame feedback', () => {
       fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
     })
 
-    neopixel = new Neopixel()
+    neopixel = new NeoPixel()
     await neopixel.connect(fakeTransport)
   })
 
