@@ -3,14 +3,14 @@ const NeoPixel = require('..')
 const PIXELS = 60
 const PAUSE = 20
 const COLORS = [
-  {r: 255, g: 0, b: 0},
-  {r: 0, g: 255, b: 0},
-  {r: 0, g: 0, b: 255},
-  {r: 255, g: 255, b: 255},
+  { r: 255, g: 0, b: 0 },
+  { r: 0, g: 255, b: 0 },
+  { r: 0, g: 0, b: 255 },
+  { r: 255, g: 255, b: 255 }
 ]
 
 const neopixel = new NeoPixel()
-const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));
+const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));// eslint-disable-line
 
 (async () => {
   try {
@@ -22,9 +22,9 @@ const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));
 
     while (1) {
       let color = COLORS[colorIndex % COLORS.length]
-      const {latency} = await neopixel.setPixels([
-        {pixel: prevPixel},           //turnoff prev curPixel
-        {pixel: curPixel, ...color}
+      const { latency } = await neopixel.setPixels([
+        { pixel: prevPixel }, // turnoff prev curPixel
+        { pixel: curPixel, ...color }
       ])
       console.log(`latency=${latency}ms`)
       await wait(PAUSE - latency)
@@ -46,7 +46,7 @@ process.on('SIGINT', async () => {
 
   await Promise.race([
     neopixel.off(),
-    wait(10000),
+    wait(10000)
   ])
   process.exit(0)
 })

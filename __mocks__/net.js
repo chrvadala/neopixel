@@ -1,4 +1,6 @@
-const {EventEmitter} = require('events')
+/* global jest */
+
+const { EventEmitter } = require('events')
 
 class Socket extends EventEmitter {
   constructor () {
@@ -15,4 +17,4 @@ class Socket extends EventEmitter {
   }
 }
 
-module.exports = {Socket}
+module.exports = { Socket }

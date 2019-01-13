@@ -1,3 +1,5 @@
+/* global test, expect */
+
 const Protocol = require('./Protocol')
 
 test('set', () => {
@@ -18,7 +20,7 @@ test('apply', () => {
     .toEqual(Buffer.from([
       9, 9,
       0x02, 0, 0, 0, 0,
-      9, 9,
+      9, 9
     ]))
 })
 
@@ -45,16 +47,16 @@ test('off', () => {
 
 test('decodeFrame', () => {
   expect(Protocol.decodeFrame(Buffer.from([0x01, 0, 0, 0])))
-    .toEqual({ack: 'connect'})
+    .toEqual({ ack: 'connect' })
 
   expect(Protocol.decodeFrame(Buffer.from([0x02, 0, 0, 0])))
-    .toEqual({ack: 'apply'})
+    .toEqual({ ack: 'apply' })
 
   expect(Protocol.decodeFrame(Buffer.from([0x03, 0, 0, 0])))
-    .toEqual({ack: 'fill'})
+    .toEqual({ ack: 'fill' })
 
   expect(Protocol.decodeFrame(Buffer.from([0x04, 0, 0, 0])))
-    .toEqual({ack: 'off'})
+    .toEqual({ ack: 'off' })
 })
 
 test('in/outFrameSize', () => {

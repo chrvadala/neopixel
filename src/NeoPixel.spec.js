@@ -1,3 +1,5 @@
+/* global beforeEach, describe, test, expect, jest */
+
 const NeoPixel = require('./NeoPixel')
 const Protocol = require('./Protocol')
 const WrongFeedback = require('./WrongFeedback')
@@ -32,7 +34,7 @@ test('connect and disconnect', async () => {
   })
 
   const neopixel = new NeoPixel()
-  await expect(neopixel.connect(fakeTransport)).resolves.toEqual({latency: expect.any(Number)})
+  await expect(neopixel.connect(fakeTransport)).resolves.toEqual({ latency: expect.any(Number) })
   expect(fakeTransport.connect).toHaveBeenCalledTimes(1)
 
   await expect(neopixel.disconnect()).resolves.toBeUndefined()
@@ -50,12 +52,12 @@ test('setPixels', async () => {
   })
 
   const neopixel = new NeoPixel()
-  const res = await neopixel.connect(fakeTransport)
+  await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
-    {p: 42, r: 1, g: 2, b: 3},
-    {pixel: 43, red: 4, green: 5, blue: 6},
-    {}, //like {l: 0, r: 0, g: 0, b: 0}
+    { p: 42, r: 1, g: 2, b: 3 },
+    { pixel: 43, red: 4, green: 5, blue: 6 },
+    {} // like {l: 0, r: 0, g: 0, b: 0}
   ])
 
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
@@ -65,7 +67,7 @@ test('setPixels', async () => {
     Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
 
-  await expect(neopixel.setPixels({l: 42, r: 1, g: 2, b: 3})).rejects.toBeInstanceOf(BadType)
+  await expect(neopixel.setPixels({ l: 42, r: 1, g: 2, b: 3 })).rejects.toBeInstanceOf(BadType)
 })
 
 test('setPixels with reset', async () => {
@@ -80,12 +82,12 @@ test('setPixels with reset', async () => {
   })
 
   const neopixel = new NeoPixel()
-  const res = await neopixel.connect(fakeTransport)
+  await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
-    {p: 42, r: 1, g: 2, b: 3},
-    {pixel: 43, red: 4, green: 5, blue: 6},
-    {}, //like {l: 0, r: 0, g: 0, b: 0}
+    { p: 42, r: 1, g: 2, b: 3 },
+    { pixel: 43, red: 4, green: 5, blue: 6 },
+    {} // like {l: 0, r: 0, g: 0, b: 0}
   ], true)
 
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
@@ -108,21 +110,21 @@ test('fill', async () => {
   })
 
   const neopixel = new NeoPixel()
-  const res = await neopixel.connect(fakeTransport)
+  await neopixel.connect(fakeTransport)
 
-  await neopixel.fill({red: 1, green: 2, blue: 3})
+  await neopixel.fill({ red: 1, green: 2, blue: 3 })
   expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3)
   )
 
-  await neopixel.fill({r: 1, g: 2, b: 3})
+  await neopixel.fill({ r: 1, g: 2, b: 3 })
   expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3)
   )
 
   await neopixel.fill({})
   expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0)
   )
 })
 
@@ -137,12 +139,12 @@ test('off', async () => {
   })
 
   const neopixel = new NeoPixel()
-  const res = await neopixel.connect(fakeTransport)
+  await neopixel.connect(fakeTransport)
 
   await neopixel.off()
 
   expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.off(Protocol.createOutboundFrame(), 0),
+    Protocol.off(Protocol.createOutboundFrame(), 0)
   )
 })
 
@@ -159,14 +161,14 @@ describe('test incoming frame feedback', () => {
   })
 
   describe('setPixels', () => {
-    const cmd = () => neopixel.setPixels([{l: 100, r: 255, g: 255, b: 255}])
+    const cmd = () => neopixel.setPixels([{ l: 100, r: 255, g: 255, b: 255 }])
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
       })
-      await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
+      await expect(cmd()).resolves.toEqual({ latency: expect.any(Number) })
     })
 
     test('with WRONG feedback', async () => {
@@ -179,14 +181,14 @@ describe('test incoming frame feedback', () => {
   })
 
   describe('fill', () => {
-    const cmd = () => neopixel.fill({r: 255, g: 255, b: 255})
+    const cmd = () => neopixel.fill({ r: 255, g: 255, b: 255 })
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK]))
       })
-      await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
+      await expect(cmd()).resolves.toEqual({ latency: expect.any(Number) })
     })
 
     test('with WRONG feedback', async () => {
@@ -206,7 +208,7 @@ describe('test incoming frame feedback', () => {
       fakeTransport.write.mockImplementation(() => {
         fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
       })
-      await expect(cmd()).resolves.toEqual({latency: expect.any(Number)})
+      await expect(cmd()).resolves.toEqual({ latency: expect.any(Number) })
     })
 
     test('with WRONG feedback', async () => {
@@ -218,4 +220,3 @@ describe('test incoming frame feedback', () => {
     })
   })
 })
-

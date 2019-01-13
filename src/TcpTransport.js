@@ -1,6 +1,6 @@
-const {EventEmitter} = require('events')
-const {Socket} = require('net')
-const {URL} = require('url')
+const { EventEmitter } = require('events')
+const { Socket } = require('net')
+const { URL } = require('url')
 const debug = require('debug')('neopixel:TcpTransport')
 
 class TcpTransport extends EventEmitter {

@@ -1,8 +1,7 @@
-/* global test, expect */
+/* global test, expect, jest */
 
 jest.mock('net')
 
-const {getPortPromise} = require('portfinder')
 const TcpTransport = require('./TcpTransport')
 
 test('connection open and close', async () => {
@@ -11,7 +10,7 @@ test('connection open and close', async () => {
   const transport = new TcpTransport(4)
 
   await expect(transport.connect('tcp://example.com:8080')).resolves.toBeUndefined()
-  expect(transport.client.connect).toHaveBeenCalledWith(8080, 'example.com', expect.any(Function)) //net socket uses inverted order
+  expect(transport.client.connect).toHaveBeenCalledWith(8080, 'example.com', expect.any(Function)) // net socket uses inverted order
 
   await expect(transport.disconnect()).resolves.toBeUndefined()
   expect(transport.client.end).toHaveBeenCalled()
@@ -74,4 +73,3 @@ test('inbound 6 bit for packet with req frame set to 4', () => {
   expect(onFrame).toHaveBeenNthCalledWith(1, Buffer.from([5, 6, 7, 8]))
   expect(onFrame).toHaveBeenNthCalledWith(2, Buffer.from([9, 10, 11, 12]))
 })
-
