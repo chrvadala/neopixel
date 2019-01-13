@@ -6,7 +6,7 @@
   "author": "chr.vadala",
   "license": "MIT",
   "dependencies": {
-    "debug": "^4.1.0"
+    "debug": "^4.1.1"
   },
   "scripts": {
     "test": "jest",
@@ -16,10 +16,9 @@
     "version": "yarn test && yarn standard"
   },
   "devDependencies": {
-    "@types/jest": "^23.3.10",
+    "@types/jest": "^23.3.12",
     "coveralls": "^3.0.2",
     "jest": "^23.6.0",
-    "portfinder": "^1.0.20",
     "standard": "^12.0.1"
   }
 }
