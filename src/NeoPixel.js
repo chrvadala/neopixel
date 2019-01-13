@@ -47,12 +47,20 @@ class NeoPixel extends EventEmitter {
     await this.transport.disconnect()
   }
 
-  setPixels (arrayOfColors) {
+  setPixels (arrayOfColors, reset = false) {
     return new Promise((resolve, reject) => {
+      const startTime = Date.now()
       if (!Array.isArray(arrayOfColors)) return reject(new BadType('setPixels accepts only arrays'))
 
-      let buffer = Protocol.createOutboundFrame(arrayOfColors.length + 1)
+      let buffer = Protocol.createOutboundFrame(arrayOfColors.length + 1 + (reset ? 1 : 0))
       let offset = 0
+
+      if (reset) {
+        Protocol.off(buffer, offset)
+        offset += Protocol.outboundFrameSize()
+        this.cbs.push({time: Date.now(), ack: 'off', resolve: () => {}, reject})
+      }
+
       for (const {pixel, p, red, r, green, g, blue, b} of arrayOfColors) {
         Protocol.set(
           buffer, offset,
@@ -64,7 +72,7 @@ class NeoPixel extends EventEmitter {
         offset += Protocol.outboundFrameSize()
       }
       Protocol.apply(buffer, offset)
-      this.cbs.push({time: Date.now(), ack: 'apply', resolve, reject})
+      this.cbs.push({time: startTime, ack: 'apply', resolve, reject})
       this.transport.write(buffer)
     })
   }

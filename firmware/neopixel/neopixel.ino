@@ -20,7 +20,7 @@
 #endif
 
 #define NAME          "neopixel"
-#define PIN            D1
+#define PIN            D2
 #define NUMPIXELS      60
 
 #define CMD_SET         0x01

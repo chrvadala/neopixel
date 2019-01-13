@@ -68,6 +68,35 @@ test('setPixels', async () => {
   await expect(neopixel.setPixels({l: 42, r: 1, g: 2, b: 3})).rejects.toBeInstanceOf(BadType)
 })
 
+test('setPixels with reset', async () => {
+  expect.assertions(1)
+
+  fakeTransport.connect.mockImplementation(() => {
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK]))
+  })
+  fakeTransport.write.mockImplementation(() => {
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK]))
+  })
+
+  const neopixel = new NeoPixel()
+  const res = await neopixel.connect(fakeTransport)
+
+  await neopixel.setPixels([
+    {p: 42, r: 1, g: 2, b: 3},
+    {pixel: 43, red: 4, green: 5, blue: 6},
+    {}, //like {l: 0, r: 0, g: 0, b: 0}
+  ], true)
+
+  expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
+    Protocol.off(Protocol.createOutboundFrame(), 0),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 4, 5, 6),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
+    Protocol.apply(Protocol.createOutboundFrame(), 0)
+  ]))
+})
+
 test('fill', async () => {
   expect.assertions(3)
 
