@@ -1,6 +1,5 @@
 const NeoPixel = require('..')
 
-const PIXELS = 60
 const PAUSE = 100
 const COLORS = [
   { r: 255 },
@@ -33,7 +32,7 @@ const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));// esl
 
     while (1) {
       let colors = []
-      for (let pixel = 0; pixel < PIXELS; pixel++) {
+      for (let pixel = 0; pixel < neopixel.pixels; pixel++) {
         const color = COLORS[(colorIndex + pixel) % COLORS.length]
         colors.push({ pixel, ...color })
       }

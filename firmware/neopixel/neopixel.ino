@@ -21,7 +21,7 @@
 
 #define NAME          "neopixel"
 #define PIN            D2
-#define NUMPIXELS      60
+#define PIXELS         60
 
 #define CMD_SET         0x01
 #define CMD_APPLY       0x02
@@ -39,7 +39,7 @@ const bool wipe = false;
 const char fill = 0x00;
 
 WiFiServer wifiServer(800);
-Adafruit_NeoPixel pixels = Adafruit_NeoPixel(NUMPIXELS, PIN, NEO_GRB + NEO_KHZ800);
+Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
 
 void setup() {
   WiFiManager wm;
@@ -105,7 +105,7 @@ bool handleCommand(Stream& client) {
       break;
 
     case CMD_FILL:
-      for (int i = 0; i < NUMPIXELS; i++) {
+      for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, red, green, blue);
       }
       pixels.show();
@@ -117,7 +117,7 @@ bool handleCommand(Stream& client) {
       break;
 
     case CMD_OFF:
-      for (int i = 0; i < NUMPIXELS; i++) {
+      for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, 0, 0, 0);
       }
       pixels.show();
@@ -137,6 +137,7 @@ bool handleCommand(Stream& client) {
 }
 
 void handleWifiClient() {
+  unsigned int pixels = PIXELS;
   WiFiClient client = wifiServer.available();
   bool established = false;
   bool res;
@@ -144,8 +145,8 @@ void handleWifiClient() {
   while (client.connected())  {
     if (!established)    {
       client.write(RES_CONN_ACK);
-      client.write(fill);
-      client.write(fill);
+      client.write((byte) pixels);
+      client.write((byte) (pixels>> 8));
       client.write(fill);
 
       established = true;

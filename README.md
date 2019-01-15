@@ -99,4 +99,10 @@ Turn of every pixel.
 const {latency} = await neopixel.off()
 ```
 
-
+### `pixels`
+Get how many pixels are available on the connected server. (Note: This number becomes available after a connection).
+```javascript
+    await neopixel.connect('tcp://neopixel.local:800')
+    console.log("PIXELS " + neopixel.pixels)
+    //60
+```   

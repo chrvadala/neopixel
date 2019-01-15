@@ -10,6 +10,7 @@ class NeoPixel extends EventEmitter {
     super()
 
     this.transport = undefined
+    this.pixels = undefined
     this.cbs = []
   }
 
@@ -38,6 +39,8 @@ class NeoPixel extends EventEmitter {
       })),
       this.transport.connect(urlOrTransport)
     ])
+
+    this.pixels = res.pixels
 
     return res
   }
@@ -102,12 +105,17 @@ class NeoPixel extends EventEmitter {
   }
 
   _handleFrame (frame) {
-    const { ack: receivedAck } = Protocol.decodeFrame(frame)
+    const decodedFrame = Protocol.decodeFrame(frame)
+    const { ack: receivedAck } = decodedFrame
+    debug('incomingFrame', decodedFrame)
     const { time, ack: expectedAck, resolve, reject } = this.cbs.shift()
     const latency = Date.now() - time
     debug('latency %d ms', latency)
     if (receivedAck === expectedAck) {
-      resolve({ latency })
+      resolve({
+        latency,
+        ...(receivedAck === 'connect' && { pixels: decodedFrame.pixels })
+      })
     } else {
       debug('WrongFeedback received: %s, expected: %s', receivedAck, expectedAck)
       reject(new WrongFeedback())

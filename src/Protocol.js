@@ -46,7 +46,7 @@ class Protocol {
     let msg = frame.readUInt8(0)
     switch (msg) {
       case RES_CONN_ACK:
-        return { ack: 'connect' }
+        return { ack: 'connect', pixels: frame.readUInt16LE(1) }
 
       case RES_APPLY_ACK:
         return { ack: 'apply' }

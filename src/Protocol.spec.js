@@ -46,8 +46,12 @@ test('off', () => {
 })
 
 test('decodeFrame', () => {
-  expect(Protocol.decodeFrame(Buffer.from([0x01, 0, 0, 0])))
-    .toEqual({ ack: 'connect' })
+  const buffer = Buffer.alloc(4)
+  buffer[0] = 0x01
+  buffer.writeUInt16LE(12345, 1)
+
+  expect(Protocol.decodeFrame(buffer))
+    .toEqual({ ack: 'connect', pixels: 12345 })
 
   expect(Protocol.decodeFrame(Buffer.from([0x02, 0, 0, 0])))
     .toEqual({ ack: 'apply' })

@@ -1,7 +1,6 @@
 const NeoPixel = require('..')
 
-const PIXELS = 60
-const PAUSE = 20
+const PAUSE = 100
 const COLORS = [
   { r: 255, g: 0, b: 0 },
   { r: 0, g: 255, b: 0 },
@@ -30,7 +29,7 @@ const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));// esl
       await wait(PAUSE - latency)
       prevPixel = curPixel
       curPixel++
-      if (curPixel >= PIXELS) {
+      if (curPixel >= neopixel.pixels) {
         curPixel = 0
         colorIndex++
       }

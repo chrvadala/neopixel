@@ -7,7 +7,6 @@ class TcpTransport extends EventEmitter {
   constructor (inboundFrameSize) {
     super()
 
-    this.URL = undefined
     this.client = undefined
     this.data = Buffer.alloc(0)
 
