@@ -35,15 +35,15 @@ const NeoPixel = require('neopixel');
 
 (async () => {
   try {
-    const PIXELS = 60
     const PAUSE = 1000
 
     const neopixel = new NeoPixel()
     await neopixel.connect('tcp://neopixel.local:800')
+    console.log('PIXELS ' + neopixel.pixels)
 
     let pixel = 0
     while (1) {
-      pixel = ++pixel % PIXELS
+      pixel = ++pixel % neopixel.pixels
       const {latency} = await neopixel.setPixels([{pixel, r: 255, g: 0, b: 0}], true)
       console.info(`latency=${latency}ms`)
       await wait(PAUSE)
