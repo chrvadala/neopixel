@@ -33,12 +33,13 @@ More details about the service discovery are available here https://github.com/e
 const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)))
 const NeoPixel = require('neopixel');
 
+const PAUSE = 1000;
+const URI = 'tcp://neopixel.local:800';
+
 (async () => {
   try {
-    const PAUSE = 1000
-
     const neopixel = new NeoPixel()
-    await neopixel.connect('tcp://neopixel.local:800')
+    await neopixel.connect(URI)
     console.log('PIXELS ' + neopixel.pixels)
 
     let pixel = 0
@@ -67,7 +68,7 @@ const neopixel = new NeoPixel()
 ### `connect(tcpUri)` 
 Connects the client with the board.   
 ```javascript
-    await neopixel.connect('tcp://neopixel.local:800')
+await neopixel.connect('tcp://neopixel.local:800')
 ```    
 
 ### `setPixels(arrayOfColors, reset=false)`
@@ -102,7 +103,7 @@ const {latency} = await neopixel.off()
 ### `pixels`
 Get how many pixels are available on the connected server. (Note: This number becomes available after a connection).
 ```javascript
-    await neopixel.connect('tcp://neopixel.local:800')
-    console.log("PIXELS " + neopixel.pixels)
-    //60
+await neopixel.connect('tcp://neopixel.local:800')
+console.log("PIXELS " + neopixel.pixels)
+//60
 ```   
