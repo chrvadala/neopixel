@@ -14,6 +14,7 @@ The *client* side can work on any machine that runs Node.js.
 
 ## Setup
 - **Upload the firmware on the ESP8266**.     
+Upload the file [firmware/neopixel/neopixel.ino](./firmware/neopixel/neopixel.ino) into your ESP8266.  
 To do this you can use the Board Manager available in the Arduino software.   
 Follow this instructions https://arduino-esp8266.readthedocs.io/en/latest/installing.html
 
