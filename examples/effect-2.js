@@ -1,38 +1,26 @@
 const NeoPixel = require('..')
 
-const PAUSE = 100
+const SERVER = process.env['SERVER'] || 'tcp://neopixel.local:800'
+const PAUSE = process.env['PAUSE'] || 1000
+
 const COLORS = [
-  { r: 255, g: 0, b: 0 },
-  { r: 0, g: 255, b: 0 },
-  { r: 0, g: 0, b: 255 },
+  { r: 255 },
+  { g: 255 },
+  { b: 255 },
   { r: 255, g: 255, b: 255 }
 ]
 
 const neopixel = new NeoPixel()
-const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));// eslint-disable-line
 
-(async () => {
+;(async () => {
   try {
-    await neopixel.connect('tcp://neopixel.local:800')
-
+    await neopixel.connect(SERVER)
     let colorIndex = 0
-    let prevPixel = 0
-    let curPixel = 0
-
     while (1) {
-      let color = COLORS[colorIndex % COLORS.length]
-      const { latency } = await neopixel.setPixels([
-        { pixel: prevPixel }, // turnoff prev curPixel
-        { pixel: curPixel, ...color }
-      ])
+      const color = COLORS[colorIndex++ % COLORS.length]
+      const { latency } = await neopixel.fill( color )
+      await NeoPixel.wait(PAUSE - latency)
       console.log(`latency=${latency}ms`)
-      await wait(PAUSE - latency)
-      prevPixel = curPixel
-      curPixel++
-      if (curPixel >= neopixel.pixels) {
-        curPixel = 0
-        colorIndex++
-      }
     }
   } catch (e) {
     console.error(`Error occurred: [${e.code}] ${e.message}`)
@@ -42,10 +30,14 @@ const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)));// esl
 
 process.on('SIGINT', async () => {
   console.log('Caught interrupt signal')
-
-  await Promise.race([
-    neopixel.off(),
-    wait(10000)
-  ])
-  process.exit(0)
+  try {
+    await Promise.race([
+      neopixel.off(),
+      NeoPixel.wait(10 * 1000)
+    ])
+    process.exit(0)
+  } catch (e) {
+    console.error(e)
+    process.exit(1)
+  }
 })

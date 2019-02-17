@@ -1,29 +1,29 @@
 const SIZE_IN_FRAME = 4
 const SIZE_OUT_FRAME = 5
 
-const CMD_SET = 0x01
-const CMD_APPLY = 0x02
+const CMD_APPLY = 0x01
+const CMD_SET = 0x02
 const CMD_FILL = 0x03
 const CMD_OFF = 0x04
 
 const RES_CONN_ACK = 0x01
 const RES_APPLY_ACK = 0x02
-const RES_FILL_ACK = 0x03
-const RES_OFF_ACK = 0x04
+
+const RES_INVALID = 0x99
 
 class Protocol {
+  static apply (buffer, offset) {
+    buffer.writeUInt8(CMD_APPLY, offset)
+    buffer.fill(0, offset + 1, offset + 1 + 4)
+    return buffer
+  }
+
   static set (buffer, offset, led, red, green, blue) {
     buffer.writeUInt8(CMD_SET, offset)
     buffer.writeUInt8(led, offset + 1)
     buffer.writeUInt8(red, offset + 2)
     buffer.writeUInt8(green, offset + 3)
     buffer.writeUInt8(blue, offset + 4)
-    return buffer
-  }
-
-  static apply (buffer, offset) {
-    buffer.writeUInt8(CMD_APPLY, offset)
-    buffer.fill(0, offset + 1, offset + 1 + 4)
     return buffer
   }
 
@@ -51,11 +51,8 @@ class Protocol {
       case RES_APPLY_ACK:
         return { ack: 'apply' }
 
-      case RES_FILL_ACK:
-        return { ack: 'fill' }
-
-      case RES_OFF_ACK:
-        return { ack: 'off' }
+      case RES_INVALID:
+        return { ack: 'invalid' } // just for testing purpose
 
       default:
         throw new Error('Unrecognized error')
@@ -82,7 +79,6 @@ Protocol.CMD_OFF = CMD_OFF
 
 Protocol.RES_CONN_ACK = RES_CONN_ACK
 Protocol.RES_APPLY_ACK = RES_APPLY_ACK
-Protocol.RES_FILL_ACK = RES_FILL_ACK
-Protocol.RES_OFF_ACK = RES_OFF_ACK
+Protocol.RES_INVALID = RES_INVALID
 
 module.exports = Protocol

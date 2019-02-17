@@ -2,18 +2,20 @@
 
 jest.mock('net')
 
-const TcpTransport = require('./TcpTransport')
+const TcpTransport = require('../src/TcpTransport')
 
 test('connection open and close', async () => {
-  expect.assertions(4)
+  expect.assertions(5)
 
   const transport = new TcpTransport(4)
 
   await expect(transport.connect('tcp://example.com:8080')).resolves.toBeUndefined()
   expect(transport.client.connect).toHaveBeenCalledWith(8080, 'example.com', expect.any(Function)) // net socket uses inverted order
 
+  const client = transport.client
   await expect(transport.disconnect()).resolves.toBeUndefined()
-  expect(transport.client.end).toHaveBeenCalled()
+  expect(client.end).toHaveBeenCalled()
+  expect(transport.client).toBeUndefined()
 })
 
 test('outbound', () => {

@@ -42,7 +42,7 @@ class NeoPixel extends EventEmitter {
 
     this.pixels = res.pixels
 
-    return res
+    return { latency: res.latency, pixels: res.pixels }
   }
 
   async disconnect () {
@@ -60,7 +60,6 @@ class NeoPixel extends EventEmitter {
       if (reset) {
         Protocol.off(buffer, offset)
         offset += Protocol.outboundFrameSize()
-        this.cbs.push({ time: Date.now(), ack: 'off', resolve: () => {}, reject })
       }
 
       for (const { pixel, p, red, r, green, g, blue, b } of arrayOfColors) {
@@ -81,7 +80,7 @@ class NeoPixel extends EventEmitter {
 
   fill (color) {
     return new Promise((resolve, reject) => {
-      let buffer = Protocol.createOutboundFrame()
+      let buffer = Protocol.createOutboundFrame(2)
       const { red, r, green, g, blue, b } = color
       Protocol.fill(
         buffer, 0,
@@ -89,17 +88,19 @@ class NeoPixel extends EventEmitter {
         green || g || 0,
         blue || b || 0
       )
-      this.cbs.push({ time: Date.now(), ack: 'fill', resolve, reject })
+      Protocol.apply(buffer, Protocol.outboundFrameSize())
+      this.cbs.push({ time: Date.now(), ack: 'apply', resolve, reject })
       this.transport.write(buffer)
     })
   }
 
   off () {
     return new Promise((resolve, reject) => {
-      let buffer = Protocol.createOutboundFrame()
+      let buffer = Protocol.createOutboundFrame(2)
       Protocol.off(buffer, 0)
+      Protocol.apply(buffer, Protocol.outboundFrameSize())
 
-      this.cbs.push({ time: Date.now(), ack: 'off', resolve, reject })
+      this.cbs.push({ time: Date.now(), ack: 'apply', resolve, reject })
       this.transport.write(buffer)
     })
   }
@@ -120,6 +121,12 @@ class NeoPixel extends EventEmitter {
       debug('WrongFeedback received: %s, expected: %s', receivedAck, expectedAck)
       reject(new WrongFeedback())
     }
+  }
+
+  static wait (ms) {
+    return new Promise(resolve => {
+      return setTimeout(resolve, Math.max(ms, 0))
+    })
   }
 }
 

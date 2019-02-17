@@ -1,9 +1,9 @@
 /* global beforeEach, describe, test, expect, jest */
 
-const NeoPixel = require('./NeoPixel')
-const Protocol = require('./Protocol')
-const WrongFeedback = require('./WrongFeedback')
-const BadType = require('./BadType')
+const NeoPixel = require('../src/NeoPixel')
+const Protocol = require('../src/Protocol')
+const WrongFeedback = require('../src/WrongFeedback')
+const BadType = require('../src/BadType')
 
 const fakeTransport = {
   connect: jest.fn(),
@@ -77,7 +77,6 @@ test('setPixels with reset', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK, 0, 0, 0]))
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
   })
 
@@ -106,26 +105,29 @@ test('fill', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
   await neopixel.connect(fakeTransport)
 
   await neopixel.fill({ red: 1, green: 2, blue: 3 })
-  expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3)
-  )
+  expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.apply(Protocol.createOutboundFrame())
+  ]))
 
   await neopixel.fill({ r: 1, g: 2, b: 3 })
-  expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3)
-  )
+  expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.apply(Protocol.createOutboundFrame())
+  ]))
 
   await neopixel.fill({})
-  expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0)
-  )
+  expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0),
+    Protocol.apply(Protocol.createOutboundFrame())
+  ]))
 })
 
 test('off', async () => {
@@ -135,7 +137,7 @@ test('off', async () => {
     fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
@@ -143,9 +145,10 @@ test('off', async () => {
 
   await neopixel.off()
 
-  expect(fakeTransport.write).toHaveBeenCalledWith(
-    Protocol.off(Protocol.createOutboundFrame(), 0)
-  )
+  expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
+    Protocol.off(Protocol.createOutboundFrame(), 0),
+    Protocol.apply(Protocol.createOutboundFrame())
+  ]))
 })
 
 describe('test incoming frame feedback', () => {
@@ -174,7 +177,7 @@ describe('test incoming frame feedback', () => {
     test('with WRONG feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
-        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK, 0, 0, 0]))
+        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_INVALID, 0, 0, 0]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
     })
@@ -186,7 +189,7 @@ describe('test incoming frame feedback', () => {
     test('with GOOD feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
-        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_FILL_ACK, 0, 0, 0]))
+        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
       })
       await expect(cmd()).resolves.toEqual({ latency: expect.any(Number) })
     })
@@ -194,7 +197,7 @@ describe('test incoming frame feedback', () => {
     test('with WRONG feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
-        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_INVALID, 0, 0, 0]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
     })
@@ -206,7 +209,7 @@ describe('test incoming frame feedback', () => {
     test('with GOOD feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
-        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_OFF_ACK, 0, 0, 0]))
+        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
       })
       await expect(cmd()).resolves.toEqual({ latency: expect.any(Number) })
     })
@@ -214,7 +217,7 @@ describe('test incoming frame feedback', () => {
     test('with WRONG feedback', async () => {
       expect.assertions(1)
       fakeTransport.write.mockImplementation(() => {
-        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+        fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_INVALID, 0, 0, 0]))
       })
       await expect(cmd()).rejects.toBeInstanceOf(WrongFeedback)
     })

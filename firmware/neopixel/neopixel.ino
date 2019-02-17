@@ -23,17 +23,15 @@
 #define PIN            D2
 #define PIXELS         60
 
-#define CMD_SET         0x01
-#define CMD_APPLY       0x02
+#define CMD_APPLY       0x01
+#define CMD_SET         0x02
 #define CMD_FILL        0x03
 #define CMD_OFF         0x04
 
 #define RES_CONN_ACK    0x01
 #define RES_APPLY_ACK   0x02
-#define RES_FILL_ACK    0x03
-#define RES_OFF_ACK     0x04
 
-const bool debug = false; //enable this increases the latency
+const bool debug = false; //if enabled this increases the latency
 const bool wipe = false;
 
 const char fill = 0x00;
@@ -94,25 +92,10 @@ bool handleCommand(Stream& client) {
       if (debug) Serial.println("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
-    case CMD_APPLY:
-      pixels.show();
-      client.write(RES_APPLY_ACK);
-      client.write(fill);
-      client.write(fill);
-      client.write(fill);
-
-      if (debug) Serial.println("CMD_APPLY");
-      break;
-
     case CMD_FILL:
       for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, red, green, blue);
       }
-      pixels.show();
-      client.write(RES_FILL_ACK);
-      client.write(fill);
-      client.write(fill);
-      client.write(fill);
       if (debug) Serial.println("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
@@ -120,12 +103,16 @@ bool handleCommand(Stream& client) {
       for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, 0, 0, 0);
       }
-      pixels.show();
-      client.write(RES_OFF_ACK);
-      client.write(fill);
-      client.write(fill);
-      client.write(fill);
       if (debug) Serial.println("CMD_OFF");
+      break;
+
+    case CMD_APPLY:
+      pixels.show();
+      client.write(RES_APPLY_ACK);
+      client.write(fill);
+      client.write(fill);
+      client.write(fill);
+      if (debug) Serial.println("CMD_APPLY");
       break;
 
     default:
@@ -146,7 +133,7 @@ void handleWifiClient() {
     if (!established)    {
       client.write(RES_CONN_ACK);
       client.write((byte) pixels);
-      client.write((byte) (pixels>> 8));
+      client.write((byte) (pixels >> 8));
       client.write(fill);
 
       established = true;

@@ -43,11 +43,12 @@ class TcpTransport extends EventEmitter {
   disconnect () {
     debug('disconnecting')
     if (!this.client) throw new Error('Client is not ready')
-    return new Promise((resolve, reject) => {
+    return new Promise(resolve => {
       this.client.end(() => {
         debug('disconnect')
         resolve()
       })
+      this.client = undefined
     })
   }
 

@@ -1,17 +1,6 @@
 /* global test, expect */
 
-const Protocol = require('./Protocol')
-
-test('set', () => {
-  const b = Buffer.alloc(Protocol.outboundFrameSize() + 4, 9)
-
-  expect(Protocol.set(b, 2, 42, 101, 102, 103))
-    .toEqual(Buffer.from([
-      9, 9,
-      0x01, 42, 101, 102, 103,
-      9, 9
-    ]))
-})
+const Protocol = require('../src/Protocol')
 
 test('apply', () => {
   const b = Buffer.alloc(Protocol.outboundFrameSize() + 4, 9)
@@ -19,7 +8,18 @@ test('apply', () => {
   expect(Protocol.apply(b, 2))
     .toEqual(Buffer.from([
       9, 9,
-      0x02, 0, 0, 0, 0,
+      0x01, 0, 0, 0, 0,
+      9, 9
+    ]))
+})
+
+test('set', () => {
+  const b = Buffer.alloc(Protocol.outboundFrameSize() + 4, 9)
+
+  expect(Protocol.set(b, 2, 42, 101, 102, 103))
+    .toEqual(Buffer.from([
+      9, 9,
+      0x02, 42, 101, 102, 103,
       9, 9
     ]))
 })
@@ -55,12 +55,6 @@ test('decodeFrame', () => {
 
   expect(Protocol.decodeFrame(Buffer.from([0x02, 0, 0, 0])))
     .toEqual({ ack: 'apply' })
-
-  expect(Protocol.decodeFrame(Buffer.from([0x03, 0, 0, 0])))
-    .toEqual({ ack: 'fill' })
-
-  expect(Protocol.decodeFrame(Buffer.from([0x04, 0, 0, 0])))
-    .toEqual({ ack: 'off' })
 })
 
 test('in/outFrameSize', () => {

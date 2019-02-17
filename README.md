@@ -30,24 +30,24 @@ More details about the service discovery are available here https://github.com/e
 
 ## Example
 ```javascript
-const wait = ms => new Promise(done => setTimeout(done, Math.max(ms, 0)))
 const NeoPixel = require('neopixel');
 
-const PAUSE = 1000;
-const URI = 'tcp://neopixel.local:800';
+const SERVER = process.env['SERVER'] || 'tcp://neopixel.local:800'
+const PAUSE = parseInt(process.env['PAUSE']) || 1000
 
-(async () => {
+const neopixel = new NeoPixel()
+
+;(async () => {
   try {
-    const neopixel = new NeoPixel()
-    await neopixel.connect(URI)
-    console.log('PIXELS ' + neopixel.pixels)
+    let { pixels } = await neopixel.connect(SERVER)
+    console.log('PIXELS ' + pixels)
 
     let pixel = 0
     while (1) {
       pixel = ++pixel % neopixel.pixels
-      const {latency} = await neopixel.setPixels([{pixel, r: 255, g: 0, b: 0}], true)
+      const { latency } = await neopixel.setPixels([{ pixel, r: 255, g: 0, b: 0 }], true)
       console.info(`latency=${latency}ms`)
-      await wait(PAUSE)
+      await NeoPixel.wait(PAUSE - latency)
     }
   } catch (e) {
     console.error(`Error occurred: [${e.code}] ${e.message}`)
@@ -66,9 +66,9 @@ const neopixel = new NeoPixel()
 ```
 
 ### `connect(tcpUri)` 
-Connects the client with the board.   
+Connects client with the board and returns number of configured pixels.   
 ```javascript
-await neopixel.connect('tcp://neopixel.local:800')
+const {latency, pixels} = await neopixel.connect('tcp://neopixel.local:800')
 ```    
 
 ### `setPixels(arrayOfColors, reset=false)`
@@ -99,11 +99,3 @@ Turn of every pixel.
 ```javascript
 const {latency} = await neopixel.off()
 ```
-
-### `pixels`
-Get how many pixels are available on the connected server. (Note: This number becomes available after a connection).
-```javascript
-await neopixel.connect('tcp://neopixel.local:800')
-console.log("PIXELS " + neopixel.pixels)
-//60
-```   
