@@ -18,7 +18,7 @@ const neopixel = new NeoPixel()
     let colorIndex = 0
     while (1) {
       const color = COLORS[colorIndex++ % COLORS.length]
-      const { latency } = await neopixel.fill( color )
+      const { latency } = await neopixel.fill(color)
       await NeoPixel.wait(PAUSE - latency)
       console.log(`latency=${latency}ms`)
     }
