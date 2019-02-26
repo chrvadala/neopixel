@@ -1,5 +1,5 @@
 const SIZE_IN_FRAME = 4
-const SIZE_OUT_FRAME = 5
+const SIZE_OUT_FRAME = 6
 
 const CMD_APPLY = 0x01
 const CMD_SET = 0x02
@@ -14,31 +14,32 @@ const RES_INVALID = 0x99
 class Protocol {
   static apply (buffer, offset) {
     buffer.writeUInt8(CMD_APPLY, offset)
-    buffer.fill(0, offset + 1, offset + 1 + 4)
+    buffer.fill(0, offset + 1, offset + SIZE_OUT_FRAME)
     return buffer
   }
 
   static set (buffer, offset, led, red, green, blue) {
     buffer.writeUInt8(CMD_SET, offset)
-    buffer.writeUInt8(led, offset + 1)
-    buffer.writeUInt8(red, offset + 2)
-    buffer.writeUInt8(green, offset + 3)
-    buffer.writeUInt8(blue, offset + 4)
+    buffer.writeUInt16LE(led, offset + 1)
+    buffer.writeUInt8(red, offset + 3)
+    buffer.writeUInt8(green, offset + 4)
+    buffer.writeUInt8(blue, offset + 5)
     return buffer
   }
 
   static fill (buffer, offset, red, green, blue) {
     buffer.writeUInt8(CMD_FILL, offset)
     buffer.writeUInt8(0x00, offset + 1)
-    buffer.writeUInt8(red, offset + 2)
-    buffer.writeUInt8(green, offset + 3)
-    buffer.writeUInt8(blue, offset + 4)
+    buffer.writeUInt8(0x00, offset + 2)
+    buffer.writeUInt8(red, offset + 3)
+    buffer.writeUInt8(green, offset + 4)
+    buffer.writeUInt8(blue, offset + 5)
     return buffer
   }
 
   static off (buffer, offset) {
     buffer.writeUInt8(CMD_OFF, offset)
-    buffer.fill(0, offset + 1, offset + 1 + 4)
+    buffer.fill(0, offset + 1, offset + SIZE_OUT_FRAME)
     return buffer
   }
 

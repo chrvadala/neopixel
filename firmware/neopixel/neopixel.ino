@@ -1,27 +1,21 @@
 /**
   Firmware for https://github.com/chrvadala/neopixel library
-
-  set pixel and apply
-  echo -ne '\x01\x10\xff\xff\xff\x02\x00\x00\x00\x00' | nc neopixel.local 800 | hexdump
-
-  set pixels with a color
-  echo -ne '\x03\x10\xff\xff\xff' | nc neopixel.local 800 | hexdump
-
-  turn off every pixel
-  echo -ne '\x04\x10\xff\xff\xff' | nc neopixel.local 800 | hexdump
-
 **/
 
 #include "WiFiManager.h"
 #include "Adafruit_NeoPixel.h"
+#include <stdio.h>
 #include <ESP8266mDNS.h>
-#ifdef __AVR__
-#include <avr/power.h>
-#endif
+
 
 #define NAME          "neopixel"
 #define PIN            D2
-#define PIXELS         60
+#define PIXELS         204
+#define DEBUG          false //if enabled this increases the latency
+#define WIPE           false //if enabled reset the wireless credentials
+
+uint8_t zeros[] = {0, 0, 0};
+#define LOG(...) if(DEBUG) Serial.println(__VA_ARGS__)
 
 #define CMD_APPLY       0x01
 #define CMD_SET         0x02
@@ -31,35 +25,31 @@
 #define RES_CONN_ACK    0x01
 #define RES_APPLY_ACK   0x02
 
-const bool debug = false; //if enabled this increases the latency
-const bool wipe = false;
-
-const char fill = 0x00;
-
 WiFiServer wifiServer(800);
 Adafruit_NeoPixel pixels = Adafruit_NeoPixel(PIXELS, PIN, NEO_GRB + NEO_KHZ800);
+
 
 void setup() {
   WiFiManager wm;
 
-  if (debug) {
+  if (DEBUG) {
     Serial.begin(115200);
     Serial.println("hello");
     wm.setDebugOutput(true);
   }
 
-  if (wipe) wm.resetSettings();
+  if (WIPE) wm.resetSettings();
 
   bool res = wm.autoConnect(NAME);
 
   if (!res) {
-    if (debug) Serial.println("Failed to connect");
+    LOG("Failed to connect");
 
     ESP.restart();
   }
 
   if (!MDNS.begin(NAME)) {
-    if (debug) Serial.println("Failed announce");
+    LOG("Failed announce");
     ESP.restart();
   }
 
@@ -74,49 +64,47 @@ void loop() {
 }
 
 
+uint8_t params[6];
 
-byte params [5];
+#define cmd params[0]
+#define led *((uint16_t*) &params[1])
+#define red params[3]
+#define green params[4]
+#define blue params[5]
+
 bool handleCommand(Stream& client) {
-  int n = client.readBytes((byte*)params, 5);
-  if (n < 5) return false;
-
-  int cmd = params[0];
-  int led = params[1], brightness = params[1];
-  int red = params[2];
-  int green = params[3];
-  int blue = params[4];
+  if (client.available() < 6) return false;
+  int n = client.readBytes(params, 6);
 
   switch (cmd) {
     case CMD_SET:
       pixels.setPixelColor(led, red, green, blue);
-      if (debug) Serial.println("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      LOG("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
     case CMD_FILL:
       for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, red, green, blue);
       }
-      if (debug) Serial.println("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      LOG("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
       break;
 
     case CMD_OFF:
       for (int i = 0; i < PIXELS; i++) {
         pixels.setPixelColor(i, 0, 0, 0);
       }
-      if (debug) Serial.println("CMD_OFF");
+      LOG("CMD_OFF");
       break;
 
     case CMD_APPLY:
       pixels.show();
       client.write(RES_APPLY_ACK);
-      client.write(fill);
-      client.write(fill);
-      client.write(fill);
-      if (debug) Serial.println("CMD_APPLY");
+      client.write(zeros, 3);
+      LOG("CMD_APPLY");
       break;
 
     default:
-      if (debug) Serial.println("BAD_CMD");
+      LOG("BAD_CMD");
       break;
   }
 
@@ -124,7 +112,7 @@ bool handleCommand(Stream& client) {
 }
 
 void handleWifiClient() {
-  unsigned int pixels = PIXELS;
+  uint16_t pixels = PIXELS;
   WiFiClient client = wifiServer.available();
   bool established = false;
   bool res;
@@ -132,20 +120,19 @@ void handleWifiClient() {
   while (client.connected())  {
     if (!established)    {
       client.write(RES_CONN_ACK);
-      client.write((byte) pixels);
-      client.write((byte) (pixels >> 8));
-      client.write(fill);
+      client.write((uint8_t*)&pixels, 2);
+      client.write(zeros, 1);
 
       established = true;
       digitalWrite(LED_BUILTIN, LOW);
-      if (debug) Serial.println("connected");
+      LOG("connected");
     }
 
     if (client.available())    {
       res = handleCommand(client);
 
       if (!res) {
-        if (debug) Serial.println("close");
+        LOG("close");
         client.stop();
         established = false;
         digitalWrite(LED_BUILTIN, HIGH);
@@ -158,6 +145,6 @@ void handleWifiClient() {
   if (established) {
     established = false;
     digitalWrite(LED_BUILTIN, HIGH);
-    if (debug) Serial.println("disconnected");
+    LOG("disconnected");
   }
 }
