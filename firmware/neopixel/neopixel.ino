@@ -9,7 +9,7 @@
 
 
 #define NAME          "neopixel"
-#define PIN            D2
+#define PIN            D3
 #define PIXELS         204
 #define DEBUG          false //if enabled this increases the latency
 #define WIPE           false //if enabled reset the wireless credentials
@@ -128,21 +128,13 @@ void handleWifiClient() {
       LOG("connected");
     }
 
-    if (client.available())    {
-      res = handleCommand(client);
-
-      if (!res) {
-        LOG("close");
-        client.stop();
-        established = false;
-        digitalWrite(LED_BUILTIN, HIGH);
-      }
-    }
-
+    handleCommand(client);
+    
     yield();
   }
 
   if (established) {
+    client.stop();
     established = false;
     digitalWrite(LED_BUILTIN, HIGH);
     LOG("disconnected");
