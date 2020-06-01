@@ -4,6 +4,13 @@ This library enables the **Adafruit NeoPixel** control from a **Node.js** script
 The *server* side has to be installed on an **ESP8266/Arduino** (or compatible) board.   
 The *client* side can work on any machine that runs Node.js.
 
+[![chrvadala](https://img.shields.io/badge/website-chrvadala-orange.svg)](https://chrvadala.github.io)
+[![Test](https://github.com/chrvadala/neopixel/workflows/Test/badge.svg)](https://github.com/chrvadala/neopixel/actions)
+[![Coverage Status](https://coveralls.io/repos/github/chrvadala/neopixel/badge.svg?branch=master)](https://coveralls.io/github/chrvadala/neopixel?branch=master)
+[![npm](https://img.shields.io/npm/v/neopixel.svg?maxAge=2592000?style=plastic)](https://www.npmjs.com/package/neopixel)
+[![Downloads](https://img.shields.io/npm/dm/neopixel.svg)](https://www.npmjs.com/package/neopixel)
+[![Donate](https://img.shields.io/badge/donate-PayPal-green.svg)](https://www.paypal.me/chrvadala/25)
+
 
 ## Requirements
 - **ESP8266** or compatible board, available here https://amzn.to/2Vpm3C8#esp8266
