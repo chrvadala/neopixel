@@ -100,3 +100,11 @@ Turn of every pixel.
 ```javascript
 const {latency} = await neopixel.off()
 ```
+
+## Changelog
+- **0.x** - Beta version
+- **1.0** - First official version
+- **1.1** - Migrates to gh-workflows; Upgrades deps; Deprecated Node 8
+
+## Contributors
+- [chrvadala](https://github.com/chrvadala) (author)

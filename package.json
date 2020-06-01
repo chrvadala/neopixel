@@ -1,6 +1,6 @@
 {
   "name": "neopixel",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "main": "src/NeoPixel.js",
   "repository": "https://github.com/chrvadala/neopixel.git",
   "author": "chr.vadala",
