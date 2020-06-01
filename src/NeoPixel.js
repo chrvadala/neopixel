@@ -54,7 +54,7 @@ class NeoPixel extends EventEmitter {
       const startTime = Date.now()
       if (!Array.isArray(arrayOfColors)) return reject(new BadType('setPixels accepts only arrays'))
 
-      let buffer = Protocol.createOutboundFrame(arrayOfColors.length + 1 + (reset ? 1 : 0))
+      const buffer = Protocol.createOutboundFrame(arrayOfColors.length + 1 + (reset ? 1 : 0))
       let offset = 0
 
       if (reset) {
@@ -80,7 +80,7 @@ class NeoPixel extends EventEmitter {
 
   fill (color) {
     return new Promise((resolve, reject) => {
-      let buffer = Protocol.createOutboundFrame(2)
+      const buffer = Protocol.createOutboundFrame(2)
       const { red, r, green, g, blue, b } = color
       Protocol.fill(
         buffer, 0,
@@ -96,7 +96,7 @@ class NeoPixel extends EventEmitter {
 
   off () {
     return new Promise((resolve, reject) => {
-      let buffer = Protocol.createOutboundFrame(2)
+      const buffer = Protocol.createOutboundFrame(2)
       Protocol.off(buffer, 0)
       Protocol.apply(buffer, Protocol.outboundFrameSize())
 

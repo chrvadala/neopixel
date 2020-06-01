@@ -1,7 +1,7 @@
 const NeoPixel = require('..')
 
-const SERVER = process.env['SERVER'] || 'tcp://neopixel.local:800'
-const PAUSE = process.env['PAUSE'] || 1000
+const SERVER = process.env.SERVER || 'tcp://neopixel.local:800'
+const PAUSE = process.env.PAUSE || 1000
 
 const neopixel = new NeoPixel()
 

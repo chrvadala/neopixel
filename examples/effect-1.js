@@ -1,13 +1,13 @@
 const NeoPixel = require('..')
 
-const SERVER = process.env['SERVER'] || 'tcp://neopixel.local:800'
-const PAUSE = parseInt(process.env['PAUSE']) || 1000
+const SERVER = process.env.SERVER || 'tcp://neopixel.local:800'
+const PAUSE = parseInt(process.env.PAUSE) || 1000
 
 const neopixel = new NeoPixel()
 
 ;(async () => {
   try {
-    let { pixels } = await neopixel.connect(SERVER)
+    const { pixels } = await neopixel.connect(SERVER)
     console.log('PIXELS ' + pixels)
 
     let pixel = 0

@@ -1,7 +1,7 @@
 const NeoPixel = require('..')
 
-const SERVER = process.env['SERVER'] || 'tcp://neopixel.local:800'
-const PAUSE = process.env['PAUSE'] || 1000
+const SERVER = process.env.SERVER || 'tcp://neopixel.local:800'
+const PAUSE = process.env.PAUSE || 1000
 
 const COLORS = [
   { r: 255 },
@@ -32,7 +32,7 @@ const neopixel = new NeoPixel()
     let colorIndex = 0
 
     while (1) {
-      let colors = []
+      const colors = []
       for (let pixel = 0; pixel < neopixel.pixels; pixel++) {
         const color = COLORS[(colorIndex + pixel) % COLORS.length]
         colors.push({ pixel, ...color })

@@ -73,7 +73,7 @@ class TcpTransport extends EventEmitter {
 
     let toConsume = 0
     for (let i = 0; i < data.length; i += frameSize) {
-      let slice = data.slice(i, i + frameSize)
+      const slice = data.slice(i, i + frameSize)
       if (slice.length === frameSize) {
         toConsume = i + frameSize
         debug('frame', slice)

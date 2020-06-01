@@ -18,7 +18,7 @@ test('apply', () => {
 test('set', () => {
   const b = Buffer.alloc(Protocol.outboundFrameSize() + 4, PLACEHOLDER)
 
-  let n = Buffer.alloc(2)
+  const n = Buffer.alloc(2)
   n.writeUInt16LE(42, 0)
 
   expect(Protocol.set(b, 2, 42, 101, 102, 103))

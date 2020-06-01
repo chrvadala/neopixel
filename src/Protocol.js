@@ -44,7 +44,7 @@ class Protocol {
   }
 
   static decodeFrame (frame) {
-    let msg = frame.readUInt8(0)
+    const msg = frame.readUInt8(0)
     switch (msg) {
       case RES_CONN_ACK:
         return { ack: 'connect', pixels: frame.readUInt16LE(1) }
