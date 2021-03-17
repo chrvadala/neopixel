@@ -1,5 +1,5 @@
 const SIZE_IN_FRAME = 4
-const SIZE_OUT_FRAME = 6
+const SIZE_OUT_FRAME = 7
 
 const CMD_APPLY = 0x01
 const CMD_SET = 0x02
@@ -18,22 +18,24 @@ class Protocol {
     return buffer
   }
 
-  static set (buffer, offset, led, red, green, blue) {
+  static set (buffer, offset, led, red, green, blue, white) {
     buffer.writeUInt8(CMD_SET, offset)
     buffer.writeUInt16LE(led, offset + 1)
     buffer.writeUInt8(red, offset + 3)
     buffer.writeUInt8(green, offset + 4)
     buffer.writeUInt8(blue, offset + 5)
+    buffer.writeUInt8(white, offset + 6)
     return buffer
   }
 
-  static fill (buffer, offset, red, green, blue) {
+  static fill (buffer, offset, red, green, blue, white) {
     buffer.writeUInt8(CMD_FILL, offset)
     buffer.writeUInt8(0x00, offset + 1)
     buffer.writeUInt8(0x00, offset + 2)
     buffer.writeUInt8(red, offset + 3)
     buffer.writeUInt8(green, offset + 4)
     buffer.writeUInt8(blue, offset + 5)
+    buffer.writeUInt8(white, offset + 6)
     return buffer
   }
 

@@ -45,55 +45,55 @@ test('setPixels', async () => {
   expect.assertions(2)
 
   fakeTransport.connect.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
   await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
-    { p: 42, r: 1, g: 2, b: 3 },
-    { pixel: 43, red: 4, green: 5, blue: 6 },
+    { p: 42, r: 1, g: 2, b: 3, w: 4 },
+    { pixel: 43, red: 5, green: 6, blue: 7, white: 8 },
     {} // like {l: 0, r: 0, g: 0, b: 0}
   ])
 
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
-    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 4, 5, 6),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3, 4),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 5, 6, 7, 8),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0, 0),
     Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
 
-  await expect(neopixel.setPixels({ l: 42, r: 1, g: 2, b: 3 })).rejects.toBeInstanceOf(BadType)
+  await expect(neopixel.setPixels({ l: 42, r: 1, g: 2, b: 3, w: 4 })).rejects.toBeInstanceOf(BadType)
 })
 
 test('setPixels with reset', async () => {
   expect.assertions(1)
 
   fakeTransport.connect.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
   await neopixel.connect(fakeTransport)
 
   await neopixel.setPixels([
-    { p: 42, r: 1, g: 2, b: 3 },
-    { pixel: 43, red: 4, green: 5, blue: 6 },
+    { p: 42, r: 1, g: 2, b: 3, w: 4 },
+    { pixel: 43, red: 5, green: 6, blue: 7, white: 8 },
     {} // like {l: 0, r: 0, g: 0, b: 0}
   ], true)
 
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
     Protocol.off(Protocol.createOutboundFrame(), 0),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 4, 5, 6),
-    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 42, 1, 2, 3, 4),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 43, 5, 6, 7, 8),
+    Protocol.set(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0, 0),
     Protocol.apply(Protocol.createOutboundFrame(), 0)
   ]))
 })
@@ -102,30 +102,30 @@ test('fill', async () => {
   expect.assertions(3)
 
   fakeTransport.connect.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
   await neopixel.connect(fakeTransport)
 
-  await neopixel.fill({ red: 1, green: 2, blue: 3 })
+  await neopixel.fill({ red: 1, green: 2, blue: 3, white: 4 })
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3, 4),
     Protocol.apply(Protocol.createOutboundFrame())
   ]))
 
-  await neopixel.fill({ r: 1, g: 2, b: 3 })
+  await neopixel.fill({ r: 1, g: 2, b: 3, w: 4 })
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 1, 2, 3, 4),
     Protocol.apply(Protocol.createOutboundFrame())
   ]))
 
   await neopixel.fill({})
   expect(fakeTransport.write).toHaveBeenCalledWith(Buffer.concat([
-    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0),
+    Protocol.fill(Protocol.createOutboundFrame(), 0, 0, 0, 0, 0),
     Protocol.apply(Protocol.createOutboundFrame())
   ]))
 })
@@ -134,10 +134,10 @@ test('off', async () => {
   expect.assertions(1)
 
   fakeTransport.connect.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_CONN_ACK, 0, 0, 0, 0]))
   })
   fakeTransport.write.mockImplementation(() => {
-    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0]))
+    fakeTransport._simulateIncomingFrame(Buffer.from([Protocol.RES_APPLY_ACK, 0, 0, 0, 0]))
   })
 
   const neopixel = new NeoPixel()
@@ -164,7 +164,7 @@ describe('test incoming frame feedback', () => {
   })
 
   describe('setPixels', () => {
-    const cmd = () => neopixel.setPixels([{ l: 100, r: 255, g: 255, b: 255 }])
+    const cmd = () => neopixel.setPixels([{ l: 100, r: 255, g: 255, b: 255, w: 255 }])
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
@@ -184,7 +184,7 @@ describe('test incoming frame feedback', () => {
   })
 
   describe('fill', () => {
-    const cmd = () => neopixel.fill({ r: 255, g: 255, b: 255 })
+    const cmd = () => neopixel.fill({ r: 255, g: 255, b: 255, w: 255 })
 
     test('with GOOD feedback', async () => {
       expect.assertions(1)
