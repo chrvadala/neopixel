@@ -64,34 +64,35 @@ void loop() {
 }
 
 
-uint8_t params[6];
+uint8_t params[7];
 
 #define cmd params[0]
 #define led *((uint16_t*) &params[1])
 #define red params[3]
 #define green params[4]
 #define blue params[5]
+#define white params[6]
 
 bool handleCommand(Stream& client) {
-  if (client.available() < 6) return false;
-  int n = client.readBytes(params, 6);
+  if (client.available() < 7) return false;
+  int n = client.readBytes(params, 7);
 
   switch (cmd) {
     case CMD_SET:
-      pixels.setPixelColor(led, red, green, blue);
-      LOG("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      pixels.setPixelColor(led, red, green, blue, white);
+      LOG("CMD_SET " + String(led) + "[" + String(red) + ":" + String(green) + ":" + String(blue) + ":" + String(white) + "]");
       break;
 
     case CMD_FILL:
       for (int i = 0; i < PIXELS; i++) {
-        pixels.setPixelColor(i, red, green, blue);
+        pixels.setPixelColor(i, red, green, blue, white);
       }
-      LOG("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + "]");
+      LOG("CMD_FILL [" + String(red) + ":" + String(green) + ":" + String(blue) + ":" + String(white) + "]");
       break;
 
     case CMD_OFF:
       for (int i = 0; i < PIXELS; i++) {
-        pixels.setPixelColor(i, 0, 0, 0);
+        pixels.setPixelColor(i, 0, 0, 0, 0);
       }
       LOG("CMD_OFF");
       break;

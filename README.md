@@ -26,7 +26,7 @@ To do this you can use the Board Manager available in the Arduino software.
 Follow this instructions https://arduino-esp8266.readthedocs.io/en/latest/installing.html
 
 - **Wire the strip with the ESP8266**.    
-Connect the Strip Led and the ESP8266 to a power supply and the DATAIN pin with the D1 pin.     
+Connect the Strip Led and the ESP8266 to a power supply and the DATAIN pin with the D3 pin.     
 More details are available here https://learn.adafruit.com/adafruit-neopixel-uberguide/basic-connections   
 
 - **Connect your ESP8266 on your local network**.     
@@ -53,7 +53,7 @@ const neopixel = new NeoPixel()
     let pixel = 0
     while (1) {
       pixel = ++pixel % neopixel.pixels
-      const { latency } = await neopixel.setPixels([{ pixel, r: 255, g: 0, b: 0 }], true)
+      const { latency } = await neopixel.setPixels([{ pixel, r: 255, g: 0, b: 0, w: 0 }], true)
       console.info(`latency=${latency}ms`)
       await NeoPixel.wait(PAUSE - latency)
     }
@@ -83,23 +83,23 @@ const {latency, pixels} = await neopixel.connect('tcp://neopixel.local:800')
 Sets pixel colors. If reset, any other pixel is turned off.
 ```javascript
 const {latency} = await neopixel.setPixels([
-    {pixel: 10, red: 255, green: 0, blue: 0},
-    {pixel: 20, red: 0, green: 255, blue: 0},
+    {pixel: 10, red: 255, green: 0, blue: 0, white: 0},
+    {pixel: 20, red: 0, green: 255, blue: 0, white: 0},
 ], true)
 
 // shorthand version
 const {latency} = await neopixel.setPixels([
-    {p: 10, r: 255, g: 0, b: 0},
-    {p: 20, r: 0, g: 255, b: 0},
+    {p: 10, r: 255, g: 0, b: 0, w: 0},
+    {p: 20, r: 0, g: 255, b: 0: w: 0},
 ], true)
 ```
 ### `fill(color)`
 Sets every pixel with the same color.  
 ```javascript
-const {latency} = await neopixel.fill({red: 255, green: 0, blue: 0})
+const {latency} = await neopixel.fill({red: 255, green: 0, blue: 0, white: 0})
 
 // shorthand version
-const {latency} = await neopixel.fill({r: 255, g: 0, b: 0})
+const {latency} = await neopixel.fill({r: 255, g: 0, b: 0, w: 0})
 ```
 
 ### `off()`
@@ -108,10 +108,16 @@ Turn of every pixel.
 const {latency} = await neopixel.off()
 ```
 
+## RGBW strip support
+In order to control RGBW strips, correct Adafruit_NeoPixel flag needs to be set in firmware.
+More details about configuration are available here https://github.com/adafruit/Adafruit_NeoPixel.   
+
+
 ## Changelog
 - **0.x** - Beta version
 - **1.0** - First official version
 - **1.1** - Migrates to gh-workflows; Upgrades deps; Deprecated Node 8
+- **1.2** - Added support for RGBW strips
 
 ## Contributors
 - [chrvadala](https://github.com/chrvadala) (author)

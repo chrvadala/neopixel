@@ -62,13 +62,14 @@ class NeoPixel extends EventEmitter {
         offset += Protocol.outboundFrameSize()
       }
 
-      for (const { pixel, p, red, r, green, g, blue, b } of arrayOfColors) {
+      for (const { pixel, p, red, r, green, g, blue, b, white, w } of arrayOfColors) {
         Protocol.set(
           buffer, offset,
           pixel || p || 0,
           red || r || 0,
           green || g || 0,
-          blue || b || 0
+          blue || b || 0,
+          white || w || 0
         )
         offset += Protocol.outboundFrameSize()
       }
@@ -81,13 +82,15 @@ class NeoPixel extends EventEmitter {
   fill (color) {
     return new Promise((resolve, reject) => {
       const buffer = Protocol.createOutboundFrame(2)
-      const { red, r, green, g, blue, b } = color
+      const { red, r, green, g, blue, b, white, w } = color
       Protocol.fill(
         buffer, 0,
         red || r || 0,
         green || g || 0,
-        blue || b || 0
+        blue || b || 0,
+        white || w || 0
       )
+      console.log(Protocol.outboundFrameSize())
       Protocol.apply(buffer, Protocol.outboundFrameSize())
       this.cbs.push({ time: Date.now(), ack: 'apply', resolve, reject })
       this.transport.write(buffer)
